@@ -1,6 +1,12 @@
-## Redlime: SublimeText 3 Redmine Client
+## Redlime: SublimeText 3 Redmine manager
 
-SublimeText Plugin to interact with Redmine right in your editor. Based on another plugin: [SubRed](https://packagecontrol.io/packages/SubRed)
+SublimeText 3 plugin to manage Redmine issues. 
+Concept idea based on another plugin (fork): [SubRed](https://packagecontrol.io/packages/SubRed), but with many differences and improvements:
+* Fully customizable issue fields - default and custom.
+* Edit all issue properties.
+* Show/open issue dependencies, subissues, attachments.
+* Redmine project as main path to issues (queries are supported too).
+* With improved interface and improved highlighting based on own syntax (or possible to use markdown themes).
 
 ## Install
 
@@ -86,9 +92,4 @@ Example:
 * Redlime issue: Change description
 * Redlime issue: Open selected issue
 * Redlime issue: Change selected custom field
-* Redlime issue: Open external wiki
-
-#### Hotkeys 
-[f2] *change subject* [c] *post a comment* [s] *change state* [v] *change version* [b] *change custom field*              
-[a] *assing to* [p] *change priority* [m] *move to project* [r] *refresh issue* [g] *open in browser*           
-[w] *open wiki* [f] *open selected attachment* [d] *change description* [i] *open selected issue*    
+* Redlime issue: Open e
