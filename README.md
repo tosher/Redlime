@@ -92,4 +92,9 @@ Example:
 * Redlime issue: Change description
 * Redlime issue: Open selected issue
 * Redlime issue: Change selected custom field
-* Redlime issue: Open e
+* Redlime issue: Open external wiki
+
+#### Hotkeys 
+[f2] *change subject* [c] *post a comment* [s] *change state* [v] *change version* [b] *change custom field*              
+[a] *assing to* [p] *change priority* [m] *move to project* [r] *refresh issue* [g] *open in browser*           
+[w] *open wiki* [f] *open selected attachment* [d] *change description* [i] *open selected issue*       
