@@ -1,0 +1,3 @@
+## Redlime: SublimeText 3 Redmine Client
+
+* Check README.md for setup instructions

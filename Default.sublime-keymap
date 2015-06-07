@@ -1,0 +1,114 @@
+[
+    {
+        "keys": ["shift+ctrl+k"],
+        "command": "redlime"
+    },
+    {
+        "keys": ["c"], "command": "redlime_comment_issue",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["r"], "command": "redlime_refresh_issue",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["s"], "command": "redlime_set_status",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["g"], "command": "redlime_go_redmine",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["v"], "command": "redlime_version_issue",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["a"], "command": "redlime_set_assigned",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["p"], "command": "redlime_priority_issue",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["v"], "command": "redlime",
+        "context": [
+            {"key": "setting.redlime_query", "operand": true}
+        ]
+    },
+    {
+        "keys": ["enter"], "command": "redlime",
+        "context": [
+            {"key": "setting.redlime_query", "operand": true}
+        ]
+    },
+    {
+        "keys": ["r"], "command": "redlime_issues_refresh",
+        "context": [
+            {"key": "setting.redlime_query", "operand": true}
+        ]
+    },
+    {
+        "keys": ["w"], "command": "redlime_open_wiki",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["f"], "command": "redlime_open_attachment",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["m"], "command": "redlime_change_project",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["b"], "command": "redlime_change_custom_field",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["f2"], "command": "redlime_change_subject",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["d"], "command": "redlime_change_description",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["i"], "command": "redlime_open_subissue",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
+        "keys": ["a"], "command": "redlime_assign_filter",
+        "context": [
+            {"key": "setting.redlime_query", "operand": true}
+        ]
+    }
+]

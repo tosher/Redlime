@@ -1,0 +1,21 @@
+[
+   { "caption": "Redlime: Project issues", "command": "redlime_project_issues" },
+   { "caption": "Redlime: List queries", "command": "redlime_get_query" },
+   { "caption": "Redlime: View issue", "command": "redlime" },
+   { "caption": "Redlime issue: Refresh", "command": "redlime_refresh_issue" },
+   { "caption": "Redlime issue: Post comment", "command": "redlime_comment_issue" },
+   { "caption": "Redlime issue: Change version", "command": "redlime_version_issue" },
+   { "caption": "Redlime issue: Set status", "command": "redlime_set_status" },
+   { "caption": "Redlime issue: Change project", "command": "redlime_change_project" },
+   { "caption": "Redlime issue: Change selected custom field", "command": "redlime_change_custom_field" },
+   { "caption": "Redlime issue: Change subject", "command": "redlime_change_subject" },
+   { "caption": "Redlime issue: Assign to", "command": "redlime_set_assigned" },
+   { "caption": "Redlime issue: Change priority", "command": "redlime_priority_issue" },
+   { "caption": "Redlime issue: Open in browser", "command": "redlime_go_redmine" },
+   { "caption": "Redlime: Refresh issues", "command": "redlime_issues_refresh" },
+   { "caption": "Redlime: Assign filter", "command": "redlime_assign_filter" },
+   { "caption": "Redlime issue: Open external wiki page", "command": "redlime_open_wiki" },
+   { "caption": "Redlime issue: Open selected attachment", "command": "redlime_open_attachment" },
+   { "caption": "Redlime issue: Change description", "command": "redlime_change_description" },
+   { "caption": "Redlime issue: Open selected issue", "command": "redlime_open_subissue" }
+]

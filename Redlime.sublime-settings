@@ -1,0 +1,30 @@
+{
+    "redmine_url": "https://redmine.com",
+    "api_key": "",
+    "projects_filter": [],
+    "assigned_to_group_id_filter": 0,
+    "syntax_file": "Packages/Redlime/Redlime.tmLanguage",
+    "external_wiki_field": "",
+    "issue_list_columns": [
+        { "prop": "id", "colname": "#", "custom": false, "align": "right" },
+        { "prop": "fixed_version", "colname": "Version", "custom": false},
+        { "prop": "Build", "colname": "Build", "custom": true},
+        { "prop": "tracker", "colname": "Type", "custom": false},
+        { "prop": "priority", "colname": "Prior.", "custom": false},
+        { "prop": "status", "colname": "Status", "custom": false},
+        { "prop": "assigned_to", "colname": "Assigned", "custom": false},
+        { "prop": "subject", "colname": "Subject", "custom": false, "maxlen": 80}
+    ],
+    "issue_view_columns": [
+        { "prop": "id", "colname": "Issue", "custom": false},
+        { "prop": "project", "colname": "Project", "custom": false},
+        { "prop": "fixed_version", "colname": "Version", "custom": false},
+        { "prop": "status", "colname": "Status", "custom": false},
+        { "prop": "priority", "colname": "Priority", "custom": false},
+        { "prop": "author", "colname": "Author", "custom": false},
+        { "prop": "assigned_to", "colname": "Assigned to", "custom": false},
+        { "prop": "created_on", "colname": "Creation date", "custom": false, "type": "datetime"},
+        { "prop": "Build", "colname": "Build", "custom": true}
+    ]
+
+}
