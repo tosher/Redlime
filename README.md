@@ -10,9 +10,11 @@ The easiest way to install this is with [Package Control](http://wbond.net/subli
  * If you just went and installed Package Control, you probably need to restart Sublime Text before doing this next bit.
  * Bring up the Command Palette (Command+Shift+p on OS X, Control+Shift+p on Linux/Windows).
  * **Temporary!** Select "Package Control: Add Repository" and add
+ 
  ```
  https://github.com/tosher/Redlime.git
  ```
+ 
  * Select "Package Control: Install Package" (it'll take a few seconds)
  * Select TSQL Easy when the list appears.
 
@@ -21,7 +23,7 @@ Package Control will automatically keep **Redlime** up to date with the latest v
 ### Configure
 
 ##### Basic
-* Set the *redmine_url* and *api_key* in *Preferences: Package Settings > SubRed > Settings – User*.
+* Set the *redmine_url* and *api_key* in *Preferences: Package Settings > Redlime > Settings – User*.
 * Configure the *issue_list_columns* and *issue_view_columns* for showing issues as you want.
 * Set the *projects_filter* and *assigned_to_group_id_filter* for filtering data for your projects only.
 
@@ -89,4 +91,4 @@ Example:
 #### Hotkeys 
 [f2] *change subject* [c] *post a comment* [s] *change state* [v] *change version* [b] *change custom field*              
 [a] *assing to* [p] *change priority* [m] *move to project* [r] *refresh issue* [g] *open in browser*           
-[w] *open wiki* [f] *open selected attachment* [d] *change description* [i] *open selected issue*       
+[w] *open wiki* [f] *open selected attachment* [d] *change description* [i] *open selected issue*    
