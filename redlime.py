@@ -767,8 +767,9 @@ class RedlimeFetchQueryCommand(sublime_plugin.TextCommand):
 
 
 ### Events ###
-# class RedlimeLoad(sublime_plugin.EventListener):
-#     def on_selection_modified(self, view):
-#         if view.is_read_only():
-#             view.sel().add(view.line(view.sel()[0].end()))
+class RedlimeLoad(sublime_plugin.EventListener):
+    def on_selection_modified(self, view):
+        is_redlime = view.settings().get('redlime_query', False) or view.settings().get('redlime_issue', False)
+        if view.is_read_only() and is_redlime:
+            view.sel().add(view.line(view.sel()[0].end()))
 
