@@ -204,7 +204,10 @@ class RedlimeChangeProjectCommand(sublime_plugin.TextCommand):
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
             projects_filter = rl_get_setting('projects_filter', [])
-            projects = [redmine.project.get(id) for id in projects_filter]
+            if projects_filter:
+                projects = [redmine.project.get(pid) for pid in projects_filter]
+            else:
+                projects = redmine.project.all()
             projects_names = [prj.name for prj in projects]
 
             self.view.window().show_quick_panel(projects_names, on_done)
@@ -422,7 +425,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
         r.settings().set('issue_id', issue.id)
 
         cols_data = []
-        line_format = '{:<%s}: {:<}' % cols_maxlen
+        line_format = '\t{:<%s}: {:<}' % cols_maxlen
         for col in cols:
             value = None
             field_type = col.get('type', None)
@@ -486,7 +489,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             content += BLOCK_LINE
             try:
                 for child in issue.children:
-                    content += '%s: **%s**\n' % (child.id, child.subject)
+                    content += '\t%s: **%s**\n' % (child.id, child.subject)
             except Exception as e:
                 print(e)
             content += BLOCK_LINE
@@ -497,7 +500,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             content += BLOCK_LINE
             try:
                 for rel in issue.relations:
-                    content += '%s: **%s**\n' % (rel.issue_to_id, rel.relation_type)
+                    content += '\t%s: **%s**\n' % (rel.issue_to_id, rel.relation_type)
             except Exception as e:
                 print(e)
             content += BLOCK_LINE
@@ -507,7 +510,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             content += '## Attachments\n'
             content += BLOCK_LINE
             for f in issue.attachments:
-                content += '[%s](%s)\n' % (f.filename, urllib.parse.unquote(f.content_url))
+                content += '\t[%s](%s)\n' % (f.filename, urllib.parse.unquote(f.content_url))
             content += BLOCK_LINE
             content += '\n'
 
