@@ -70,7 +70,7 @@
         ]
     },
     {
-        "keys": ["f"], "command": "redlime_open_attachment",
+        "keys": ["l"], "command": "redlime_open_link",
         "context": [
             {"key": "setting.redlime_issue", "operand": true}
         ]

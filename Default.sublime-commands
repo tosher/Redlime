@@ -15,7 +15,7 @@
    { "caption": "Redlime: Refresh issues", "command": "redlime_issues_refresh" },
    { "caption": "Redlime: Assign filter", "command": "redlime_assign_filter" },
    { "caption": "Redlime issue: Open external wiki page", "command": "redlime_open_wiki" },
-   { "caption": "Redlime issue: Open selected attachment", "command": "redlime_open_attachment" },
+   { "caption": "Redlime issue: Open selected link", "command": "redlime_open_link" },
    { "caption": "Redlime issue: Change description", "command": "redlime_change_description" },
    { "caption": "Redlime issue: Open selected issue", "command": "redlime_open_subissue" }
 ]

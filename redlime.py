@@ -364,8 +364,8 @@ class RedlimeOpenWikiCommand(sublime_plugin.TextCommand):
                     webbrowser.open(wiki_url)
 
 
-# Issue: Open selected attachment
-class RedlimeOpenAttachmentCommand(sublime_plugin.TextCommand):
+# Issue: Open selected link: attachment, revision
+class RedlimeOpenLinkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         url = self.view.substr(self.view.sel()[0]).split('(')[1].rstrip(')')
         if url:
@@ -460,7 +460,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             '[r](refresh issue)',
             '[g](open in browser)',
             '[w](open external wiki)',
-            '[f](open selected attachment)',
+            '[l](open selected link)',
             '[d](change description)',
             '[i](open selected issue)']
 
@@ -532,6 +532,17 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             content += '\n'
             content += '## Comments\n'
             content += comments
+
+        if issue.changesets:
+            content += '## Revisions\n'
+            content += BLOCK_LINE
+            for chset in issue.changesets:
+                redmine_url = rl_get_setting('redmine_url')
+                project = self.redmine.project.get(issue.project.id)
+                chset_url = '%s/projects/%s/repository/revisions/%s' % (redmine_url.rstrip('/'), project.identifier, chset['revision'])
+                content += '\t[%s](%s)\n\t**Comment**: %s *(%s)*\n' % (chset['user']['name'], chset_url, chset['comments'], rl_get_datetime(chset['committed_on']))
+            content += BLOCK_LINE
+            content += '\n'
 
         r.insert(edit, 0, content)
         r.set_name("Issue #%s" % issue_id)

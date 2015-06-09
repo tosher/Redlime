@@ -75,7 +75,9 @@ Example:
 * Redlime: Assign filter
 
 #### Hotkeys 
-[Enter] *view issue* [r] *refresh issues* [a] *assign filter*
+* <kbd>Enter</kbd> *view issue* 
+* <kbd>r</kbd> *refresh issues* 
+* <kbd>a</kbd> *assign filter*
 
 #### Issue view/edit commands
 * Redlime: View issue
@@ -88,13 +90,24 @@ Example:
 * Redlime issue: Assign to
 * Redlime issue: Change priority
 * Redlime issue: Open in browser
-* Redlime issue: Open selected attachment
+* Redlime issue: Open selected link
 * Redlime issue: Change description
 * Redlime issue: Open selected issue
 * Redlime issue: Change selected custom field
 * Redlime issue: Open external wiki
 
 #### Hotkeys 
-[f2] *change subject* [c] *post a comment* [s] *change state* [v] *change version* [b] *change custom field*              
-[a] *assing to* [p] *change priority* [m] *move to project* [r] *refresh issue* [g] *open in browser*           
-[w] *open wiki* [f] *open selected attachment* [d] *change description* [i] *open selected issue*       
+* <kbd>f2</kbd> *change subject* 
+* <kbd>c</kbd> *post a comment* 
+* <kbd>s</kbd> *change state* 
+* <kbd>v</kbd> *change version* 
+* <kbd>b</kbd> *change custom field*              
+* <kbd>a</kbd> *assing to* 
+* <kbd>p</kbd> *change priority* 
+* <kbd>m</kbd> *move to project* 
+* <kbd>r</kbd> *refresh issue* 
+* <kbd>g</kbd> *open in browser*           
+* <kbd>w</kbd> *open wiki* 
+* <kbd>l</kbd> *open selected link* 
+* <kbd>d</kbd> *change description* 
+* <kbd>i</kbd> *open selected issue*       
