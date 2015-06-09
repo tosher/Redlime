@@ -664,20 +664,22 @@ class RedlimeGetQueryCommand(sublime_plugin.TextCommand):
                 project_id = query_projects[i]
                 self.view.run_command('redlime_fetch_query', {'project_id': project_id, 'query_id': query, 'query_project_name': query_names[i]})
 
-        projects_filter = rl_get_setting('projects_filter', [])
         redmine = Redlime.connect()
-        projects_filter_ids = [redmine.project.get(pid).id for pid in projects_filter]
+        projects_filter = rl_get_setting('projects_filter', [])
+        if projects_filter:
+            projects = [redmine.project.get(pid) for pid in projects_filter]
+        else:
+            projects = redmine.project.all()
+
         queries = redmine.query.all()
         query_names = []
         query_ids = []
         query_projects = []
         for query in queries:
             if hasattr(query, 'project_id'):
-                project = redmine.project.get(query.project_id)
-                if not projects_filter or project.id in projects_filter_ids:
+                if query.project_id in [prj.id for prj in projects]:
                     project = redmine.project.get(query.project_id)
                     query_projects.append(query.project_id)
-                    # query_names.append('%s (%s)' % (query.name, project.name))
                     query_names.append([query.name, project.name])
                     query_ids.append(query.id)
 
@@ -688,15 +690,18 @@ class RedlimeGetQueryCommand(sublime_plugin.TextCommand):
 class RedlimeProjectIssuesCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        projects_filter = rl_get_setting('projects_filter', [])
         redmine = Redlime.connect()
-        projects = redmine.project.all()
+        projects_filter = rl_get_setting('projects_filter', [])
+        if projects_filter:
+            projects = [redmine.project.get(pid) for pid in projects_filter]
+        else:
+            projects = redmine.project.all()
+
         self.prj_names = []
         self.prj_ids = []
         for prj in projects:
-            if not projects_filter or prj.identifier in projects_filter:
-                self.prj_names.append(prj.name)
-                self.prj_ids.append(prj.id)
+            self.prj_names.append(prj.name)
+            self.prj_ids.append(prj.id)
         self.view.window().show_quick_panel(self.prj_names, self.on_done)
 
     def on_done(self, idx):
