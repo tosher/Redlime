@@ -2,7 +2,7 @@
     "redmine_url": "https://redmine.com",
     "api_key": "",
     "projects_filter": [],
-    "assigned_to_group_id_filter": 0,
+    "assigned_to_group_id_filter": [],
     "syntax_file": "Packages/Redlime/Redlime.tmLanguage",
     "external_wiki_field": "",
     "issue_list_columns": [
