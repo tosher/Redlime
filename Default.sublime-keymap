@@ -106,6 +106,12 @@
         ]
     },
     {
+        "keys": ["enter"], "command": "redlime_magic_enter",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
         "keys": ["a"], "command": "redlime_assign_filter",
         "context": [
             {"key": "setting.redlime_query", "operand": true}

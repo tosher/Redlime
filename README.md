@@ -95,6 +95,7 @@ Example:
 * Redlime issue: Open selected issue
 * Redlime issue: Change selected custom field
 * Redlime issue: Open external wiki
+* Redlime issue: Magic enter
 
 #### Hotkeys 
 * <kbd>f2</kbd> *change subject* 
@@ -111,3 +112,4 @@ Example:
 * <kbd>l</kbd> *open selected link* 
 * <kbd>d</kbd> *change description* 
 * <kbd>i</kbd> *open selected issue*       
+* <kbd>Enter</kbd> *magic* - command by selected line

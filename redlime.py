@@ -327,6 +327,55 @@ class RedlimeSetAssignedCommand(sublime_plugin.TextCommand):
                 sublime.set_timeout(lambda: sublime.active_window().show_quick_panel(users_menu, on_done), 1)
 
 
+class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        header_pattern = '^##\s.*$'
+        headers = self.view.find_all(header_pattern)
+        selected = self.view.sel()[0]
+        selected_header = max([h for h in headers if h.b < selected.b])
+        selected_header_str = self.view.substr(selected_header).lstrip('# ')
+
+        if selected_header_str.startswith('SubIssues'):
+            self.view.run_command('redlime_open_subissue')
+        elif selected_header_str.startswith('Relations'):
+            self.view.run_command('redlime_open_subissue')
+        elif selected_header_str.startswith('Attachments'):
+            self.view.run_command('redlime_open_link')
+        elif selected_header_str.startswith('Description'):
+            self.view.run_command('redlime_change_description')
+        elif selected_header_str.startswith('Comments'):
+            self.view.run_command('redlime_comment_issue')
+        elif selected_header_str.startswith('Revision'):
+            if self.view.substr(selected).lstrip(' ').startswith('['):
+                self.view.run_command('redlime_open_link')
+        else:
+            # TODO: default values
+            cols = rl_get_setting('issue_view_columns', [])
+            colname = self.view.substr(selected).split('**')[1]
+            col_prop = ''
+            for col in cols:
+                if colname == col['colname']:
+                    col_prop = col['prop']
+                    if col['custom']:
+                        self.view.run_command('redlime_change_custom_field')
+                    else:
+                        # TODO: any props..
+                        if col_prop == 'id':
+                            self.view.run_command('redlime_go_redmine')
+                        elif col_prop == 'fixed_version':
+                            self.view.run_command('redlime_version_issue')
+                        elif col_prop == 'status':
+                            self.view.run_command('redlime_set_status')
+                        elif col_prop == 'project':
+                            self.view.run_command('redlime_change_project')
+                        elif col_prop == 'assigned_to':
+                            self.view.run_command('redlime_set_assigned')
+                        elif col_prop == 'priority':
+                            self.view.run_command('redlime_priority_issue')
+                        else:
+                            sublime.message_dialog('Not implemented in this version')
+
+
 # Issue: Open in Browser
 class RedlimeGoRedmineCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -334,7 +383,7 @@ class RedlimeGoRedmineCommand(sublime_plugin.TextCommand):
         settings = sublime.load_settings("Redlime.sublime-settings")
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
-            url = '%s/issues/%s' % (settings.get('redmine_url'), issue_id)
+            url = '%s/issues/%s' % (settings.get('redmine_url').rstrip('/'), issue_id)
             webbrowser.open(url)
 
 
@@ -470,7 +519,8 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             '[w](open external wiki)',
             '[l](open selected link)',
             '[d](change description)',
-            '[i](open selected issue)']
+            '[i](open selected issue)',
+            '[Enter](magic)']
 
         shortcuts_print = ''
         maxlen = len(max(shortcuts, key=len)) + 2
@@ -809,4 +859,3 @@ class RedlimeLoad(sublime_plugin.EventListener):
         is_redlime = view.settings().get('redlime_query', False) or view.settings().get('redlime_issue', False)
         if view.is_read_only() and is_redlime:
             view.sel().add(view.line(view.sel()[0].end()))
-

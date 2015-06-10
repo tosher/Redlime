@@ -17,5 +17,6 @@
    { "caption": "Redlime issue: Open external wiki page", "command": "redlime_open_wiki" },
    { "caption": "Redlime issue: Open selected link", "command": "redlime_open_link" },
    { "caption": "Redlime issue: Change description", "command": "redlime_change_description" },
-   { "caption": "Redlime issue: Open selected issue", "command": "redlime_open_subissue" }
+   { "caption": "Redlime issue: Open selected issue", "command": "redlime_open_subissue" },
+   { "caption": "Redlime issue: Magic enter", "command": "redlime_magic_enter" }
 ]
