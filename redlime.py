@@ -298,25 +298,33 @@ class RedlimeSetAssignedCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         def on_done(index):
             if index >= 0:
-                issue_id = self.view.settings().get('issue_id', None)
-                if issue_id:
-                    issue = redmine.issue.get(issue_id)
-                    assigned_to_id = users[index].id
-                    issue.assigned_to_id = assigned_to_id
-                    issue.save()
+                assigned_to_id = users[index].id
+                issue.assigned_to_id = assigned_to_id
+                issue.save()
 
-                    sublime.status_message('Issue #%r is assigned to %s!' % (issue.id, users_menu[index]))
-                    self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
-            else:
-                return
+                sublime.status_message('Issue #%r is assigned to %s!' % (issue.id, users_menu[index]))
+                self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
+
         redmine = Redlime.connect()
-        group_id = rl_get_setting('assigned_to_group_id_filter')  # user group filter
-        users = redmine.user.filter(group_id=group_id)
+        users = []
         users_menu = []
-        for user in users:
-            users_menu.append('%s %s' % (user.firstname, user.lastname))
+        issue_id = self.view.settings().get('issue_id', None)
+        if issue_id:
+            issue = redmine.issue.get(issue_id)
+            groups = rl_get_setting('assigned_to_group_id_filter', [])  # user group filter
+            if groups:
+                for group_id in groups:
+                    for user in redmine.user.filter(group_id=group_id):
+                        if user.id not in [user.id for user in users]:
+                            users.append(user)
+            else:
+                project_id = issue.project.id
+                users = [redmine.user.get(user.user.id) for user in redmine.project_membership.filter(project_id=project_id) if hasattr(user, 'user')]
 
-        sublime.set_timeout(lambda: sublime.active_window().show_quick_panel(users_menu, on_done), 1)
+            if users:
+                for user in users:
+                    users_menu.append('%s %s' % (user.firstname, user.lastname))
+                sublime.set_timeout(lambda: sublime.active_window().show_quick_panel(users_menu, on_done), 1)
 
 
 # Issue: Open in Browser
@@ -731,27 +739,37 @@ class RedlimeProjectIssuesCommand(sublime_plugin.TextCommand):
             r.set_read_only(True)
 
 
-# Issues filter by "Assigned to"
+# Projects issues filter by "Assigned to"
 class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        group_id = rl_get_setting('assigned_to_group_id_filter')  # user group filter
-        redmine = Redlime.connect()
-        self.users = redmine.user.filter(group_id=group_id)
+        self.users = []
         self.users_menu = ['*All users']
-        for user in self.users:
-            self.users_menu.append('%s %s' % (user.firstname, user.lastname))
-        self.view.window().show_quick_panel(self.users_menu, self.on_done)
+        redmine = Redlime.connect()
+        groups = rl_get_setting('assigned_to_group_id_filter', [])  # user group filter
+        if groups:
+            for group_id in groups:
+                for user in redmine.user.filter(group_id=group_id):
+                    if user.id not in [user.id for user in self.users]:
+                        self.users.append(user)
+        else:
+            query_params = self.view.settings().get('query_params', {})
+            project_id = query_params.get('project_id')
+            self.users = [redmine.user.get(user.user.id) for user in redmine.project_membership.filter(project_id=project_id) if hasattr(user, 'user')]
+
+        if self.users:
+            for user in self.users:
+                self.users_menu.append('%s %s' % (user.firstname, user.lastname))
+            self.view.window().show_quick_panel(self.users_menu, self.on_done)
 
     def on_done(self, idx):
-        r = self.view
-        query_params = r.settings().get('query_params', {})
-        if idx <= 0:
+        query_params = self.view.settings().get('query_params', {})
+        if idx == 0:
             query_params.pop('assigned_to_id', None)
-            r.settings().set('query_params', query_params)
+            self.view.settings().set('query_params', query_params)
         elif idx > 0:
             query_params['assigned_to_id'] = self.users[idx - 1].id
-            r.settings().set('query_params', query_params)
+            self.view.settings().set('query_params', query_params)
         self.view.run_command('redlime_issues_refresh')
 
 
