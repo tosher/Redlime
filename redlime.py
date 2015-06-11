@@ -696,7 +696,7 @@ def rl_show_cases(**kwargs):
                         value = rl_get_safe(issue, col_prop)
                         if field_type == 'datetime':
                             value = rl_get_datetime(value)
-                    else:
+                    elif hasattr(issue, 'custom_fields'):
                         for field in issue.custom_fields:
                             if field['name'] == col_prop:
                                 value = rl_get_custom_value(redmine, field_type, field)
@@ -770,7 +770,7 @@ def rl_show_cases(**kwargs):
                         value = rl_get_safe(issue, col_prop)
                         if field_type == 'datetime':
                             value = rl_get_datetime(value)
-                    else:
+                    elif hasattr(issue, 'custom_fields'):
                         for field in issue.custom_fields:
                             if field['name'] == col_prop:
                                 value = rl_get_custom_value(redmine, field_type, field)
