@@ -40,7 +40,7 @@ Example:
   "redmine_url" : "URL to your Redmine",
   "api_key": "Set your Redmine API Key",
     "projects_filter": ["my_project_short_name", "my_another_project_short_name"],
-    "assigned_to_group_id_filter": 17,
+    "assigned_to_group_id_filter": [17],
     "syntax_file": "Packages/Redlime/Redlime.tmLanguage",
     "issue_list_columns": [
         { "prop": "id", "colname": "#", "custom": false, "align": "right" },
