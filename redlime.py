@@ -58,6 +58,18 @@ def rl_prepare_custom_value(redmine, field_type, field, issue_id, value):
         return value
 
 
+def rl_validate_screen(screen_type):
+
+    is_valid = sublime.active_window().active_view().settings().get(screen_type, False)
+    if not is_valid:
+        if screen_type == 'redlime_issue':
+            sublime.message_dialog('This command is provided for the issue screen!')
+        elif screen_type == 'redlime_query':
+            sublime.message_dialog('This command is provided for the issues query!')
+        else:
+            sublime.message_dialog('This command is provided for Redlime view!')
+
+
 class Redlime:
     def connect():
         settings = sublime.load_settings("Redlime.sublime-settings")
@@ -101,6 +113,10 @@ class RedlimeCommand(sublime_plugin.TextCommand):
 # Issue comment
 class RedlimeCommentIssueCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+
+        # validate
+        rl_validate_screen('redlime_issue')
+
         self.view.window().show_input_panel("Comment #:", "", self.post_comment, None, None)
 
     def post_comment(self, text):
@@ -116,6 +132,9 @@ class RedlimeVersionIssueCommand(sublime_plugin.TextCommand):
                 issue.save()
                 sublime.status_message('Version changed!')
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
+
+        # validate
+        rl_validate_screen('redlime_issue')
 
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
@@ -139,6 +158,9 @@ class RedlimePriorityIssueCommand(sublime_plugin.TextCommand):
                 issue.save()
                 sublime.status_message('Priority changed!')
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
+
+        # validate
+        rl_validate_screen('redlime_issue')
 
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
@@ -175,6 +197,9 @@ class RedlimeSetStatusCommand(sublime_plugin.TextCommand):
                     sublime.status_message('Issue #%r now is %s' % (issue.id, statuses_names[i]))
                     self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
 
+        # validate
+        rl_validate_screen('redlime_issue')
+
         redmine = Redlime.connect()
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
@@ -200,6 +225,9 @@ class RedlimeChangeProjectCommand(sublime_plugin.TextCommand):
                     sublime.status_message('Issue #%r is moved to %s' % (issue.id, projects[i].name))
                     self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
 
+        # validate
+        rl_validate_screen('redlime_issue')
+
         redmine = Redlime.connect()
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
@@ -224,6 +252,9 @@ class RedlimeChangeCustomFieldCommand(sublime_plugin.TextCommand):
                     issue.custom_fields = [{'id': field_id, 'value': value}]
                     issue.save()
                     self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
+
+        # validate
+        rl_validate_screen('redlime_issue')
 
         redmine = Redlime.connect()
         field_id = None
@@ -268,6 +299,9 @@ class RedlimeChangeSubjectCommand(sublime_plugin.TextCommand):
                     issue.save()
                     self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
 
+        # validate
+        rl_validate_screen('redlime_issue')
+
         redmine = Redlime.connect()
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
@@ -285,6 +319,9 @@ class RedlimeChangeDescriptionCommand(sublime_plugin.TextCommand):
                     issue.description = text
                     issue.save()
                     self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
+
+        # validate
+        rl_validate_screen('redlime_issue')
 
         redmine = Redlime.connect()
         issue_id = self.view.settings().get('issue_id', None)
@@ -304,6 +341,9 @@ class RedlimeSetAssignedCommand(sublime_plugin.TextCommand):
 
                 sublime.status_message('Issue #%r is assigned to %s!' % (issue.id, users_menu[index]))
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
+
+        # validate
+        rl_validate_screen('redlime_issue')
 
         redmine = Redlime.connect()
         users = []
@@ -329,67 +369,82 @@ class RedlimeSetAssignedCommand(sublime_plugin.TextCommand):
 
 class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        header_pattern = '^##\s.*$'
-        headers = self.view.find_all(header_pattern)
-        selected = self.view.sel()[0]
-        selected_header = max([h for h in headers if h.b < selected.b])
-        selected_header_str = self.view.substr(selected_header).lstrip('# ')
 
-        if selected_header_str.startswith('SubIssues'):
-            self.view.run_command('redlime_open_subissue')
-        elif selected_header_str.startswith('Relations'):
-            self.view.run_command('redlime_open_subissue')
-        elif selected_header_str.startswith('Attachments'):
-            self.view.run_command('redlime_open_link')
-        elif selected_header_str.startswith('Description'):
-            self.view.run_command('redlime_change_description')
-        elif selected_header_str.startswith('Comments'):
-            self.view.run_command('redlime_comment_issue')
-        elif selected_header_str.startswith('Revision'):
-            if self.view.substr(selected).lstrip(' ').startswith('['):
+        # validate
+        rl_validate_screen('redlime_issue')
+
+        header_pattern = '^##\s.*$'
+        try:
+            headers = self.view.find_all(header_pattern)
+            selected = self.view.sel()[0]
+            selected_header = max([h for h in headers if h.b < selected.b])
+            selected_header_str = self.view.substr(selected_header).lstrip('# ')
+        except:
+            pass
+
+        if selected_header_str:
+
+            if selected_header_str.startswith('SubIssues'):
+                self.view.run_command('redlime_open_subissue')
+            elif selected_header_str.startswith('Relations'):
+                self.view.run_command('redlime_open_subissue')
+            elif selected_header_str.startswith('Attachments'):
                 self.view.run_command('redlime_open_link')
-        else:
-            # TODO: default values
-            cols = rl_get_setting('issue_view_columns', [])
-            colname = self.view.substr(selected).split('**')[1]
-            col_prop = ''
-            for col in cols:
-                if colname == col['colname']:
-                    col_prop = col['prop']
-                    if col['custom']:
-                        self.view.run_command('redlime_change_custom_field')
-                    else:
-                        # TODO: any props..
-                        if col_prop == 'id':
-                            self.view.run_command('redlime_go_redmine')
-                        elif col_prop == 'fixed_version':
-                            self.view.run_command('redlime_version_issue')
-                        elif col_prop == 'status':
-                            self.view.run_command('redlime_set_status')
-                        elif col_prop == 'project':
-                            self.view.run_command('redlime_change_project')
-                        elif col_prop == 'assigned_to':
-                            self.view.run_command('redlime_set_assigned')
-                        elif col_prop == 'priority':
-                            self.view.run_command('redlime_priority_issue')
+            elif selected_header_str.startswith('Description'):
+                self.view.run_command('redlime_change_description')
+            elif selected_header_str.startswith('Comments'):
+                self.view.run_command('redlime_comment_issue')
+            elif selected_header_str.startswith('Revision'):
+                if self.view.substr(selected).lstrip(' ').startswith('['):
+                    self.view.run_command('redlime_open_link')
+            else:
+                # TODO: default values
+                cols = rl_get_setting('issue_view_columns', [])
+                colname = self.view.substr(selected).split('**')[1]
+                col_prop = ''
+                for col in cols:
+                    if colname == col['colname']:
+                        col_prop = col['prop']
+                        if col['custom']:
+                            self.view.run_command('redlime_change_custom_field')
                         else:
-                            sublime.message_dialog('Not implemented in this version')
+                            # TODO: any props..
+                            if col_prop == 'id':
+                                self.view.run_command('redlime_go_redmine')
+                            elif col_prop == 'fixed_version':
+                                self.view.run_command('redlime_version_issue')
+                            elif col_prop == 'status':
+                                self.view.run_command('redlime_set_status')
+                            elif col_prop == 'project':
+                                self.view.run_command('redlime_change_project')
+                            elif col_prop == 'assigned_to':
+                                self.view.run_command('redlime_set_assigned')
+                            elif col_prop == 'priority':
+                                self.view.run_command('redlime_priority_issue')
+                            else:
+                                sublime.message_dialog('Not implemented in this version')
 
 
 # Issue: Open in Browser
 class RedlimeGoRedmineCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        # current_os = platform.system()
-        settings = sublime.load_settings("Redlime.sublime-settings")
+
+        # validate
+        rl_validate_screen('redlime_issue')
+
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
-            url = '%s/issues/%s' % (settings.get('redmine_url').rstrip('/'), issue_id)
+            url = '%s/issues/%s' % (rl_get_setting('redmine_url').rstrip('/'), issue_id)
             webbrowser.open(url)
 
 
 # Issue: Comment add
 class RedlimePostCommentCommand(sublime_plugin.TextCommand):
     def run(self, edit, text):
+
+        # validate
+        rl_validate_screen('redlime_issue')
+
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
             redmine = Redlime.connect()
@@ -405,6 +460,10 @@ class RedlimePostCommentCommand(sublime_plugin.TextCommand):
 # Issue: Open external wiki page (custom)
 class RedlimeOpenWikiCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+
+        # validate
+        rl_validate_screen('redlime_issue')
+
         field_prop = rl_get_setting('external_wiki_field', None)
         if field_prop:
             wiki_url = ''
@@ -424,6 +483,9 @@ class RedlimeOpenWikiCommand(sublime_plugin.TextCommand):
 # Issue: Open selected link: attachment, revision
 class RedlimeOpenLinkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+        # validate
+        rl_validate_screen('redlime_issue')
+
         url = self.view.substr(self.view.sel()[0]).split('(')[1].rstrip(')')
         if url:
             webbrowser.open(url)
@@ -432,6 +494,10 @@ class RedlimeOpenLinkCommand(sublime_plugin.TextCommand):
 # Issue: Open selected SubIssue
 class RedlimeOpenSubissueCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+
+        # validate
+        rl_validate_screen('redlime_issue')
+
         issue_id = None
 
         try:
@@ -793,6 +859,10 @@ class RedlimeProjectIssuesCommand(sublime_plugin.TextCommand):
 class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
+
+        # validate
+        rl_validate_screen('redlime_query')
+
         self.users = []
         self.users_menu = ['*All users']
         redmine = Redlime.connect()
@@ -826,6 +896,10 @@ class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
 # Issues refresh
 class RedlimeIssuesRefreshCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+
+        # validate
+        rl_validate_screen('redlime_query')
+
         query_params = self.view.settings().get('query_params')
         if query_params:
             text = rl_show_cases(**query_params)
