@@ -471,13 +471,14 @@ class RedlimeOpenWikiCommand(sublime_plugin.TextCommand):
             if issue_id:
                 redmine = Redlime.connect()
                 issue = redmine.issue.get(issue_id)
-                for field in issue.custom_fields:
-                    if field['name'] == field_prop:
-                        wiki_url = field['value']
-                        break
+                if hasattr(issue, 'custom_fields'):
+                    for field in issue.custom_fields:
+                        if field['name'] == field_prop:
+                            wiki_url = field['value']
+                            break
 
-                if wiki_url:
-                    webbrowser.open(wiki_url)
+                    if wiki_url:
+                        webbrowser.open(wiki_url)
 
 
 # Issue: Open selected link: attachment, revision
@@ -557,7 +558,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
                 value = rl_get_safe(issue, col_prop)
                 if field_type == 'datetime':
                     value = rl_get_datetime(value)
-            else:
+            elif hasattr(issue, 'custom_fields'):
                 for field in issue.custom_fields:
                     if field['name'] == col_prop:
                         value = rl_get_custom_value(self.redmine, field_type, field)
