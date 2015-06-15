@@ -99,7 +99,7 @@
 				</dict>
 			</dict>
 			<key>match</key>
-			<string>(\[)(\w+)(\])(\()([\w\s]+)(\))</string>
+			<string>(\[)([^\[\]]+)(\])(\()([\w\s\.\*]+)(\))</string>
 			<key>name</key>
 			<string>meta.shortcut.source.redlime</string>
 		</dict>

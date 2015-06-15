@@ -5,6 +5,7 @@
     "assigned_to_group_id_filter": [],
     "syntax_file": "Packages/Redlime/Redlime.tmLanguage",
     "external_wiki_field": "",
+    "query_page_size": 40,
     "issue_list_columns": [
         { "prop": "id", "colname": "#", "custom": false, "align": "right" },
         { "prop": "fixed_version", "colname": "Version", "custom": false},

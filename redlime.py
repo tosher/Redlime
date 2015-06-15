@@ -587,7 +587,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             '[l](open selected link)',
             '[d](change description)',
             '[i](open selected issue)',
-            '[Enter](magic)']
+            '[Enter](*magic)']
 
         shortcuts_print = ''
         maxlen = len(max(shortcuts, key=len)) + 2
@@ -739,7 +739,9 @@ def rl_show_cases(**kwargs):
 
         shortcuts = [
             '[Enter](view issue)',
-            '[r](refresh issues)']
+            '[r](refresh issues)',
+            '[<-](prev. page)',
+            '[->](next page)']
 
         if not kwargs.get('query_id', None):
             shortcuts.append('[a](assign filter)')
@@ -750,7 +752,9 @@ def rl_show_cases(**kwargs):
             kwargs.pop("title", None)  # hack: title is not query param
 
         issues = redmine.issue.filter(**kwargs)
-        content_header += 'Total: %s\n\n' % len(issues)
+
+        content_header += 'Total: %s\n' % len(issues)
+        content_header += 'Page number: %s\n\n' % kwargs.get('page_number', 1)
 
         table_data_widths = get_data()
         content_header_line = '%s-\n' % ('-' * (sum([val for key, val in table_data_widths.items()]) + len(cols) * 3))
@@ -843,12 +847,14 @@ class RedlimeProjectIssuesCommand(sublime_plugin.TextCommand):
     def on_done(self, idx):
         if idx >= 0:
             title = 'Issues: %s' % self.prj_names[idx]
-            text = rl_show_cases(project_id=self.prj_ids[idx], title=title)
+            limit = rl_get_setting('query_page_size', 40)
+            query_params = {'project_id': self.prj_ids[idx], 'title': title, 'limit': limit, 'offset': 0, 'page_number': 1}
+            text = rl_show_cases(**query_params)
             r = self.view.window().new_file()
             r.set_name(title)
             syntax_file = rl_get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
             r.set_syntax_file(syntax_file)
-            r.settings().set('query_params', {'project_id': self.prj_ids[idx], 'title': title})
+            r.settings().set('query_params', query_params)
             r.settings().set('redlime_query', True)
             r.settings().set("word_wrap", False)
             r.run_command('redlime_insert_text', {'position': 0, 'text': text})
@@ -885,6 +891,10 @@ class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
 
     def on_done(self, idx):
         query_params = self.view.settings().get('query_params', {})
+        limit = rl_get_setting('query_page_size', 40)
+        query_params['limit'] = limit
+        query_params['offset'] = 0
+        query_params['page_number'] = 1
         if idx == 0:
             query_params.pop('assigned_to_id', None)
             self.view.settings().set('query_params', query_params)
@@ -902,6 +912,40 @@ class RedlimeIssuesRefreshCommand(sublime_plugin.TextCommand):
         rl_validate_screen('redlime_query')
 
         query_params = self.view.settings().get('query_params')
+        limit = rl_get_setting('query_page_size', 40)
+        query_params['limit'] = limit
+        if query_params:
+            text = rl_show_cases(**query_params)
+            self.view.set_read_only(False)
+            self.view.erase(edit, sublime.Region(0, self.view.size()))
+            self.view.run_command('redlime_insert_text', {'position': 0, 'text': text})
+            self.view.set_read_only(True)
+
+
+# Issues next page
+class RedlimeIssuesPageCommand(sublime_plugin.TextCommand):
+    def run(self, edit, direction):
+
+        # validate
+        rl_validate_screen('redlime_query')
+
+        query_params = self.view.settings().get('query_params')
+        limit = rl_get_setting('query_page_size', 40)
+        offset = query_params.get('offset', 0)
+        page_number = query_params.get('page_number', 1)
+        if direction:
+            offset_new = offset + limit
+            page_number = page_number + 1
+        else:
+            offset_new = offset - limit
+            offset_new = offset_new if offset_new >= 0 else 0
+            page_number = page_number - 1
+            page_number = page_number if page_number >= 1 else 1
+        query_params['page_number'] = page_number
+        query_params['offset'] = offset_new
+        query_params['limit'] = limit
+        self.view.settings().set('query_params', query_params)
+
         if query_params:
             text = rl_show_cases(**query_params)
             self.view.set_read_only(False)
@@ -919,8 +963,11 @@ class RedlimeFetchQueryCommand(sublime_plugin.TextCommand):
         r.set_scratch(True)
         syntax_file = rl_get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
         r.set_syntax_file(syntax_file)
-        content = rl_show_cases(project_id=project_id, query_id=query_id, title=title)
-        r.settings().set('query_params', {'project_id': project_id, 'query_id': query_id, 'title': title})
+        limit = rl_get_setting('query_page_size', 40)
+        page_number = 1
+        query_params = {'project_id': project_id, 'query_id': query_id, 'title': title, 'limit': limit, 'offset': 0, 'page_number': page_number}
+        content = rl_show_cases(**query_params)
+        r.settings().set('query_params', query_params)
         r.settings().set('redlime_query', True)
 
         r.settings().set("word_wrap", False)

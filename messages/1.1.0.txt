@@ -1,0 +1,3 @@
+Redlime 1.1.0 changelog:
+
+* Issues list paging. Paging size by **query_page_size** parameter in settings.

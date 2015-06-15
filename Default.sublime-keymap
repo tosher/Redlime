@@ -116,5 +116,19 @@
         "context": [
             {"key": "setting.redlime_query", "operand": true}
         ]
+    },
+    {
+        "keys": ["left"], "command": "redlime_issues_page",
+        "args": {"direction": 0},
+        "context": [
+            {"key": "setting.redlime_query", "operand": true}
+        ]
+    },
+    {
+        "keys": ["right"], "command": "redlime_issues_page",
+        "args": {"direction": 1},
+        "context": [
+            {"key": "setting.redlime_query", "operand": true}
+        ]
     }
 ]

@@ -77,7 +77,9 @@ Example:
 #### Hotkeys 
 * <kbd>Enter</kbd> *view issue* 
 * <kbd>r</kbd> *refresh issues* 
-* <kbd>a</kbd> *assign filter*
+* <kbd>&#8592;</kbd> *previous page* 
+* <kbd>&#8594;</kbd> *next page* 
+* <kbd>a</kbd> *assign filter* - for project issues only
 
 #### Issue view/edit commands
 * Redlime: View issue
