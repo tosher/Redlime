@@ -2,6 +2,7 @@
 
 SublimeText 3 plugin to manage Redmine issues. 
 Concept idea based on another plugin (fork): [SubRed](https://packagecontrol.io/packages/SubRed), but with many differences and improvements:
+
 * Fully customizable issue fields - default and custom.
 * Edit all issue properties.
 * Show/open issue dependencies, subissues, attachments.
@@ -14,15 +15,9 @@ Concept idea based on another plugin (fork): [SubRed](https://packagecontrol.io/
 The easiest way to install this is with [Package Control](http://wbond.net/sublime\_packages/package\_control).
 
  * If you just went and installed Package Control, you probably need to restart Sublime Text before doing this next bit.
- * Bring up the Command Palette (Command+Shift+p on OS X, Control+Shift+p on Linux/Windows).
- * **Temporary!** Select "Package Control: Add Repository" and add
- 
- ```
- https://github.com/tosher/Redlime.git
- ```
- 
+ * Bring up the Command Palette (<kbd>Command+Shift+p</kbd> on OS X, <kbd>Control+Shift+p</kbd> on Linux/Windows).
  * Select "Package Control: Install Package" (it'll take a few seconds)
- * Select TSQL Easy when the list appears.
+ * Select Redlime when the list appears.
 
 Package Control will automatically keep **Redlime** up to date with the latest version.
 
