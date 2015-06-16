@@ -112,6 +112,12 @@
         ]
     },
     {
+        "keys": ["u"], "command": "redlime_toggle_selectable",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
         "keys": ["a"], "command": "redlime_assign_filter",
         "context": [
             {"key": "setting.redlime_query", "operand": true}

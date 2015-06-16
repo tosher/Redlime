@@ -1,0 +1,3 @@
+Redlime 1.2.0 changelog:
+
+* Toggle selection mode on issue view screen for possibility to copy any selecte

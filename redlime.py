@@ -373,6 +373,12 @@ class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
         # validate
         rl_validate_screen('redlime_issue')
 
+        # If line selection is off, can't parse lines, turn on unselectable mode
+        is_unselectable = self.view.settings().get('redlime_issue_unselectable', True)
+        if not is_unselectable:
+            self.view.settings().set('redlime_issue_unselectable', True)
+            self.view.sel().add(self.view.line(self.view.sel()[0].end()))
+
         header_pattern = '^##\s.*$'
         try:
             headers = self.view.find_all(header_pattern)
@@ -492,6 +498,16 @@ class RedlimeOpenLinkCommand(sublime_plugin.TextCommand):
             webbrowser.open(url)
 
 
+class RedlimeToggleSelectableCommand(sublime_plugin.TextCommand):
+
+    def run(self, edit):
+        is_unselectable = self.view.settings().get('redlime_issue_unselectable', True)
+        if is_unselectable:
+            self.view.settings().set('redlime_issue_unselectable', False)
+        else:
+            self.view.settings().set('redlime_issue_unselectable', True)
+
+
 # Issue: Open selected SubIssue
 class RedlimeOpenSubissueCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -587,6 +603,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             '[l](open selected link)',
             '[d](change description)',
             '[i](open selected issue)',
+            '[u](toggle select mode)',
             '[Enter](*magic)']
 
         shortcuts_print = ''
@@ -978,6 +995,9 @@ class RedlimeFetchQueryCommand(sublime_plugin.TextCommand):
 ### Events ###
 class RedlimeLoad(sublime_plugin.EventListener):
     def on_selection_modified(self, view):
-        is_redlime = view.settings().get('redlime_query', False) or view.settings().get('redlime_issue', False)
-        if view.is_read_only() and is_redlime:
+        is_redlime_query = view.settings().get('redlime_query', False)
+        is_redlime_view_unselectable = view.settings().get('redlime_issue', False) and view.settings().get('redlime_issue_unselectable', True)
+        print(is_redlime_view_unselectable)
+
+        if view.is_read_only() and (is_redlime_query or is_redlime_view_unselectable):
             view.sel().add(view.line(view.sel()[0].end()))
