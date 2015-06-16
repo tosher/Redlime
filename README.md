@@ -80,7 +80,7 @@ Example:
 * <kbd>v</kbd> Redlime issue: Change version
 * <kbd>s</kbd> Redlime issue: Set status
 * <kbd>m</kbd> Redlime issue: Change project
-* <kbd>F2</kbd>Redlime issue: Change subject
+* <kbd>F2</kbd> Redlime issue: Change subject
 * <kbd>a</kbd> Redlime issue: Assign to
 * <kbd>p</kbd> Redlime issue: Change priority
 * <kbd>g</kbd> Redlime issue: Open in browser
