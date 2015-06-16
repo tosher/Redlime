@@ -997,7 +997,6 @@ class RedlimeLoad(sublime_plugin.EventListener):
     def on_selection_modified(self, view):
         is_redlime_query = view.settings().get('redlime_query', False)
         is_redlime_view_unselectable = view.settings().get('redlime_issue', False) and view.settings().get('redlime_issue_unselectable', True)
-        print(is_redlime_view_unselectable)
 
         if view.is_read_only() and (is_redlime_query or is_redlime_view_unselectable):
             view.sel().add(view.line(view.sel()[0].end()))
