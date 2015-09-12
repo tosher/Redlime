@@ -9,6 +9,14 @@ Concept idea based on another plugin (fork): [SubRed](https://packagecontrol.io/
  * Redmine project as main path to issues (queries are supported too).
  * With improved interface and improved highlighting based on own syntax (or possible to use markdown themes).
 
+## Screenshots
+
+Project issues list:
+![Redlime - project issues](https://github.com/tosher/Redlime/wiki/redlime_issues.png)
+
+Issue:
+![Redlime - project issue](https://github.com/tosher/Redlime/wiki/redlime_issue.png)
+
 ## Install
 
 ### Package Control
