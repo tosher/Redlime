@@ -39,7 +39,7 @@ Package Control will automatically keep **Redlime** up to date with the latest v
 
 Example:
 
-```
+```json
 {
     "redmine_url" : "URL to your Redmine",
     "api_key": "Set your Redmine API Key",
