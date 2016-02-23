@@ -1,6 +1,7 @@
 {
     "redmine_url": "https://redmine.com",
     "api_key": "",
+    "connection_options": {"verify": true},
     "projects_filter": [],
     "assigned_to_group_id_filter": [],
     "syntax_file": "Packages/Redlime/Redlime.tmLanguage",

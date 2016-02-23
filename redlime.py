@@ -75,10 +75,11 @@ class Redlime:
         settings = sublime.load_settings("Redlime.sublime-settings")
         url = settings.get('redmine_url')
         api_key = settings.get('api_key')
+        requests = settings.get('connection_options')
 
         # datetime format
         # http://python-redmine.readthedocs.org/en/latest/configuration.html#datetime-formats
-        return Redmine(url, key=api_key, datetime_format='%Y-%m-%dT%H:%M:%SZ')
+        return Redmine(url, key=api_key, datetime_format='%Y-%m-%dT%H:%M:%SZ', requests=requests)
 
 
 class RedlimeInsertTextCommand(sublime_plugin.TextCommand):
@@ -997,6 +998,7 @@ class RedlimeLoad(sublime_plugin.EventListener):
     def on_selection_modified(self, view):
         is_redlime_query = view.settings().get('redlime_query', False)
         is_redlime_view_unselectable = view.settings().get('redlime_issue', False) and view.settings().get('redlime_issue_unselectable', True)
+        # print(is_redlime_view_unselectable)
 
         if view.is_read_only() and (is_redlime_query or is_redlime_view_unselectable):
             view.sel().add(view.line(view.sel()[0].end()))
