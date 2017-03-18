@@ -769,6 +769,7 @@ def rl_show_cases(**kwargs):
             content_header += '## %s\n' % kwargs['title']
             kwargs.pop("title", None)  # hack: title is not query param
 
+        kwargs['status_id'] = 'open'  # force filter opened issues
         issues = redmine.issue.filter(**kwargs)
 
         content_header += 'Total: %s\n' % len(issues)
@@ -900,11 +901,13 @@ class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
         else:
             query_params = self.view.settings().get('query_params', {})
             project_id = query_params.get('project_id')
-            self.users = [redmine.user.get(user.user.id) for user in redmine.project_membership.filter(project_id=project_id) if hasattr(user, 'user')]
+            # self.users = [redmine.user.get(user.user.id) for user in redmine.project_membership.filter(project_id=project_id) if hasattr(user, 'user')]
+            self.users = [user.user for user in redmine.project_membership.filter(project_id=project_id) if hasattr(user, 'user')]
 
         if self.users:
             for user in self.users:
-                self.users_menu.append('%s %s' % (user.firstname, user.lastname))
+                # self.users_menu.append('%s %s' % (user.firstname, user.lastname))
+                self.users_menu.append(user.name)
             self.view.window().show_quick_panel(self.users_menu, self.on_done)
 
     def on_done(self, idx):

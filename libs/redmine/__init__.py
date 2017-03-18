@@ -1,20 +1,28 @@
+import os
 import json
-import requests
+
 from distutils.version import LooseVersion
-from redmine.version import __version__
-from redmine.managers import ResourceManager
-from redmine.utilities import to_string, json_response
-from redmine.exceptions import (
+
+# using sublime's requests instead of bundled (deleted)
+# https://github.com/maxtepkeev/python-redmine/issues/109
+import requests  
+from .version import __version__
+from .managers import ResourceManager
+from .utilities import is_string, to_string
+from .exceptions import (
     AuthError,
     ConflictError,
     ImpersonateError,
     ServerError,
     ValidationError,
     NoFileError,
+    FileUrlError,
     VersionMismatchError,
     ResourceNotFoundError,
     RequestEntityTooLargeError,
-    UnknownError
+    UnknownError,
+    ForbiddenError,
+    JSONDecodeError
 )
 
 
@@ -35,6 +43,9 @@ class Redmine(object):
 
     def __getattr__(self, resource):
         """Returns either ResourceSet or Resource object depending on the method used on the ResourceManager"""
+        if resource.startswith('_'):
+            raise AttributeError
+
         return ResourceManager(self, resource)
 
     def upload(self, filepath):
@@ -47,15 +58,46 @@ class Redmine(object):
                 url = '{0}{1}'.format(self.url, '/uploads.json')
                 response = self.request('post', url, data=stream, headers={'Content-Type': 'application/octet-stream'})
         except IOError:
-            raise NoFileError()
+            raise NoFileError
 
         return response['upload']['token']
+
+    def download(self, url, savepath=None, filename=None):
+        """Downloads file from Redmine and saves it to savepath or returns it as bytes"""
+        self.requests['stream'] = True   # We don't want to load the entire file into memory
+        response = self.request('get', url, raw_response=True)
+        self.requests['stream'] = False  # Return back this setting for all usual requests
+
+        # If a savepath wasn't provided we return an iter_content method
+        # so a user can call it with the desired parameters for maximum
+        # control and iterate over the response data
+        if savepath is None:
+            return response.iter_content
+
+        try:
+            from urlparse import urlsplit
+        except ImportError:
+            from urllib.parse import urlsplit
+
+        if filename is None:
+            filename = urlsplit(url)[2].split('/')[-1]
+
+            if not filename:
+                raise FileUrlError
+
+        savepath = os.path.join(savepath, filename)
+
+        with open(savepath, 'wb') as f:
+            for chunk in response.iter_content(1024):
+                f.write(chunk)
+
+        return savepath
 
     def auth(self):
         """Shortcut for the case if we just want to check if user provided valid auth credentials"""
         return self.user.get('current')
 
-    def request(self, method, url, headers=None, params=None, data=None):
+    def request(self, method, url, headers=None, params=None, data=None, raw_response=False):
         """Makes requests to Redmine and returns result in json format"""
         kwargs = dict(self.requests, **{
             'headers': headers or {},
@@ -63,7 +105,7 @@ class Redmine(object):
             'data': data or {},
         })
 
-        if not 'Content-Type' in kwargs['headers'] and method in ('post', 'put'):
+        if 'Content-Type' not in kwargs['headers'] and method in ('post', 'put'):
             kwargs['data'] = json.dumps(data)
             kwargs['headers']['Content-Type'] = 'application/json'
 
@@ -79,22 +121,31 @@ class Redmine(object):
         response = getattr(requests, method)(url, **kwargs)
 
         if response.status_code in (200, 201):
-            if not response.content.strip():
+            if raw_response:
+                return response
+            elif not response.content.strip():
                 return True
-            return json_response(response.json)
+            else:
+                try:
+                    return response.json()
+                except (ValueError, TypeError):
+                    raise JSONDecodeError(response)
         elif response.status_code == 401:
-            raise AuthError()
+            raise AuthError
+        elif response.status_code == 403:
+            raise ForbiddenError
         elif response.status_code == 404:
             raise ResourceNotFoundError
         elif response.status_code == 409:
             raise ConflictError
         elif response.status_code == 412 and self.impersonate is not None:
-            raise ImpersonateError()
+            raise ImpersonateError
         elif response.status_code == 413:
-            raise RequestEntityTooLargeError()
+            raise RequestEntityTooLargeError
         elif response.status_code == 422:
-            raise ValidationError(to_string(', '.join(json_response(response.json)['errors'])))
+            errors = response.json()['errors']
+            raise ValidationError(to_string(', '.join(e if is_string(e) else ': '.join(e) for e in errors)))
         elif response.status_code == 500:
-            raise ServerError()
+            raise ServerError
 
         raise UnknownError(response.status_code)

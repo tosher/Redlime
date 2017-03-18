@@ -1,0 +1,4 @@
+Redlime 1.4.0 changelog:
+
+* Redmine API update to 1.5.1;
+* Users list processing optimization.

@@ -1,12 +1,17 @@
 from datetime import datetime
+
 from distutils.version import LooseVersion
-from redmine.utilities import to_string
-from redmine.managers import ResourceManager
-from redmine.exceptions import (
+
+from .utilities import to_string
+from .managers import ResourceManager
+from .exceptions import (
+    ValidationError,
+    ForbiddenError,
     ResourceAttrError,
     ReadonlyAttrError,
     CustomFieldValueError,
-    ResourceVersionMismatchError
+    ResourceVersionMismatchError,
+    ResourceNotFoundError
 )
 
 # Resources which when accessed from some other
@@ -24,6 +29,12 @@ _RESOURCE_SET_MAP = {
     'journals': 'IssueJournal',
     'children': 'Issue',
     'roles': 'Role',
+    'issues': 'Issue',
+    'projects': 'Project',
+    'notes': 'Note',
+    'deals': 'Deal',
+    'contacts': 'Contact',
+    'related_contacts': 'Contact',
 }
 
 # Resources which when accessed from some other
@@ -40,9 +51,10 @@ _RESOURCE_MAP = {
     'activity': 'Enumeration',
     'category': 'IssueCategory',
     'fixed_version': 'Version',
+    'contact': 'Contact',
 }
 
-# Resources which when access from some other
+# Resources which when accessed from some other
 # resource should be requested from Redmine
 _RESOURCE_RELATIONS_MAP = {
     'wiki_pages': 'WikiPage',
@@ -53,6 +65,9 @@ _RESOURCE_RELATIONS_MAP = {
     'relations': 'IssueRelation',
     'time_entries': 'TimeEntry',
     'issues': 'Issue',
+    'contacts': 'Contact',
+    'deals': 'Deal',
+    'deal_categories': 'DealCategory',
 }
 
 # Resource attributes which when set should
@@ -68,6 +83,8 @@ _RESOURCE_SINGLE_ATTR_ID_MAP = {
     'parent_issue_id': 'parent',
     'issue_id': 'issue',
     'activity_id': 'activity',
+    'status_id': 'status',
+    'contact_id': 'contact',
 }
 
 # Resource attributes which when set should
@@ -81,6 +98,7 @@ _RESOURCE_MULTIPLE_ATTR_ID_MAP = {
 class _Resource(object):
     """Implementation of Redmine resource"""
     redmine_version = None
+    requirements = ()
     container_all = None
     container_one = None
     container_filter = None
@@ -95,9 +113,11 @@ class _Resource(object):
 
     _includes = ()
     _relations = ()
-    _unconvertible = ()
+    _relations_name = None
+    _unconvertible = ('name', 'description')
     _members = ('manager',)
-    _readonly = ('id', 'created_on', 'updated_on', 'author', 'user', 'project', 'issue')
+    _create_readonly = ('id', 'created_on', 'updated_on', 'author', 'user', 'project', 'issue')
+    _update_readonly = _create_readonly
     __length_hint__ = None  # fixes Python 2.6 list() call on resource object
 
     def __init__(self, manager, attributes):
@@ -106,19 +126,26 @@ class _Resource(object):
         self._attributes = dict((include, None) for include in self._includes)
         self._attributes.update(dict((relation, None) for relation in self._relations))
         self._attributes.update(attributes)
-        self._readonly += self._relations + self._includes
+        self._create_readonly += self._relations + self._includes
+        self._update_readonly += self._relations + self._includes
         self._changes = {}
 
+        if self._relations_name is None:
+            self._relations_name = self.__class__.__name__.lower()
+
     def __getitem__(self, item):
-        """Provides a dictionary like access to resource attributes"""
+        """Provides a dictionary-like access to resource attributes"""
         return getattr(self, item)
 
     def __setitem__(self, item, value):
-        """Provides a dictionary like setter for resource attributes"""
+        """Provides a dictionary-like setter for resource attributes"""
         return setattr(self, item, value)
 
     def __getattr__(self, item):
         """Returns the requested attribute and makes a conversion if needed"""
+        if item.startswith('_'):
+            raise AttributeError
+
         if item in self._attributes:
             # If item shouldn't be converted let's return it as it is
             if item in self._unconvertible:
@@ -136,7 +163,7 @@ class _Resource(object):
 
             # If item is a relation and should be requested from Redmine, let's do it
             elif item in self._relations and self._attributes[item] is None:
-                filters = {'{0}_id'.format(self.__class__.__name__.lower()): self.internal_id}
+                filters = {'{0}_id'.format(self._relations_name): self.internal_id}
                 manager = ResourceManager(self.manager.redmine, _RESOURCE_RELATIONS_MAP[item])
                 self._attributes[item] = manager.filter(**filters)
                 return self._attributes[item]
@@ -169,8 +196,10 @@ class _Resource(object):
         """Sets the requested attribute"""
         if item in self._members or item.startswith('_'):
             super(_Resource, self).__setattr__(item, value)
-        elif item in self._readonly:
-            raise ReadonlyAttrError()
+        elif item in self._create_readonly and self.is_new():
+            raise ReadonlyAttrError
+        elif item in self._update_readonly and not self.is_new():
+            raise ReadonlyAttrError
         elif item == 'custom_fields':
             for org_index, org_field in enumerate(self._attributes.setdefault('custom_fields', [])):
                 if 'value' not in org_field:
@@ -179,15 +208,16 @@ class _Resource(object):
                 try:
                     for new_index, new_field in enumerate(value):
                         if org_field['id'] == new_field['id']:
-                            self._attributes['custom_fields'][org_index]['value'] = value.pop(new_index)['value']
+                            self._attributes['custom_fields'][org_index]['value'] = self.manager.prepare_params(
+                                value.pop(new_index))['value']
                 except (TypeError, KeyError):
-                    raise CustomFieldValueError()
+                    raise CustomFieldValueError
 
             self._attributes['custom_fields'].extend(value)
             self._changes[item] = self._attributes['custom_fields']
         else:
-            value = self.manager.prepare_params({item: value})[item]
-            self._changes[item] = value
+            prep_item, prep_value = self.manager.prepare_params({item: value}).popitem()
+            self._changes[prep_item] = prep_value
             self._attributes[item] = value
 
             if item in _RESOURCE_SINGLE_ATTR_ID_MAP:
@@ -253,7 +283,7 @@ class _Resource(object):
         return self.id
 
     def is_new(self):
-        """Checks if resource was just created and not yet saved to Redmine or it is existent resource"""
+        """Checks if resource was just created and not yet saved to Redmine or it is an existing resource"""
         return False if 'id' in self._attributes or 'created_on' in self._attributes else True
 
     def _action_if_attribute_absent(self):
@@ -261,9 +291,9 @@ class _Resource(object):
         raise_attr_exception = self.manager.redmine.raise_attr_exception
 
         if isinstance(raise_attr_exception, bool) and raise_attr_exception:
-            raise ResourceAttrError()
+            raise ResourceAttrError
         elif isinstance(raise_attr_exception, (list, tuple)) and self.__class__.__name__ in raise_attr_exception:
-            raise ResourceAttrError()
+            raise ResourceAttrError
 
         return None
 
@@ -305,16 +335,36 @@ class Project(_Resource):
     query_update = '/projects/{0}.json'
     query_delete = '/projects/{0}.json'
 
-    _includes = ('trackers', 'issue_categories')
-    _relations = ('wiki_pages', 'memberships', 'issue_categories', 'versions', 'news', 'issues')
-    _unconvertible = ('status',)
-    _readonly = _Resource._readonly + ('identifier',)
+    _includes = ('trackers', 'issue_categories', 'enabled_modules')
+    _relations = (
+        'wiki_pages',
+        'memberships',
+        'issue_categories',
+        'time_entries',
+        'versions',
+        'news',
+        'issues',
+        'contacts',
+        'deals',
+        'deal_categories',
+    )
+    _unconvertible = _Resource._unconvertible + ('identifier', 'status')
+    _update_readonly = _Resource._update_readonly + ('identifier',)
+
+    @property
+    def url(self):
+        return '{0}{1}'.format(self.manager.redmine.url, self.query_one.format(self.identifier).replace('.json', ''))
 
     def __getattr__(self, item):
         if item == 'parent' and item in self._attributes:
             return ResourceManager(self.manager.redmine, 'Project').to_resource(self._attributes[item])
 
-        return super(Project, self).__getattr__(item)
+        value = super(Project, self).__getattr__(item)
+
+        if item == 'enabled_modules':
+            value = [module.get('name') if isinstance(module, dict) else module for module in value]
+
+        return value
 
 
 class Issue(_Resource):
@@ -333,7 +383,9 @@ class Issue(_Resource):
 
     _includes = ('children', 'attachments', 'relations', 'changesets', 'journals', 'watchers')
     _relations = ('relations', 'time_entries')
-    _readonly = _Resource._readonly + ('spent_hours',)
+    _unconvertible = _Resource._unconvertible + ('subject', 'notes')
+    _create_readonly = _Resource._create_readonly + ('spent_hours',)
+    _update_readonly = _create_readonly
 
     class Watcher:
         """An issue watcher implementation"""
@@ -342,7 +394,7 @@ class Issue(_Resource):
             self._issue_id = issue.internal_id
 
             if self._redmine.ver is not None and LooseVersion(str(self._redmine.ver)) < LooseVersion('2.3'):
-                raise ResourceVersionMismatchError()
+                raise ResourceVersionMismatchError
 
         def add(self, user_id):
             """Adds user to issue watchers list"""
@@ -353,6 +405,13 @@ class Issue(_Resource):
             """Removes user from issue watchers list"""
             url = '{0}/issues/{1}/watchers/{2}.json'.format(self._redmine.url, self._issue_id, user_id)
             return self._redmine.request('delete', url)
+
+    @classmethod
+    def translate_params(cls, params):
+        if 'version_id' in params:
+            params['fixed_version_id'] = params.pop('version_id')
+
+        return super(Issue, cls).translate_params(params)
 
     def __getattr__(self, item):
         if item == 'version':
@@ -366,9 +425,9 @@ class Issue(_Resource):
 
     def __setattr__(self, item, value):
         if item == 'version_id':
-            return super(Issue, self).__setattr__('fixed_version_id', value)
-
-        return super(Issue, self).__setattr__(item, value)
+            super(Issue, self).__setattr__('fixed_version_id', value)
+        else:
+            super(Issue, self).__setattr__(item, value)
 
     def __str__(self):
         try:
@@ -442,20 +501,34 @@ class Attachment(_Resource):
     container_one = 'attachment'
     query_one = '/attachments/{0}.json'
 
+    def download(self, savepath=None, filename=None):
+        return self.manager.redmine.download(self.content_url, savepath, filename)
+
     def __str__(self):
-        return to_string(self.filename)
+        try:
+            return to_string(self.filename)
+        except ResourceAttrError:
+            return str(self.id)
 
     def __repr__(self):
-        return '<{0}.{1} #{2} "{3}">'.format(
-            self.__class__.__module__,
-            self.__class__.__name__,
-            self.id,
-            to_string(self.filename)
-        )
+        try:
+            return '<{0}.{1} #{2} "{3}">'.format(
+                self.__class__.__module__,
+                self.__class__.__name__,
+                self.id,
+                to_string(self.filename)
+            )
+        except ResourceAttrError:
+            return '<{0}.{1} #{2}>'.format(
+                self.__class__.__module__,
+                self.__class__.__name__,
+                self.id
+            )
 
 
 class IssueJournal(_Resource):
     redmine_version = '1.0'
+    _unconvertible = ('notes',)
 
     def __str__(self):
         return str(self.id)
@@ -481,7 +554,9 @@ class WikiPage(_Resource):
     query_delete = '/projects/{project_id}/wiki/{0}.json'
 
     _includes = ('attachments',)
-    _readonly = _Resource._readonly + ('version',)
+    _unconvertible = _Resource._unconvertible + ('title', 'text')
+    _create_readonly = _Resource._create_readonly + ('version',)
+    _update_readonly = _create_readonly
 
     def refresh(self, **params):
         return super(WikiPage, self).refresh(**dict(params, project_id=self.manager.params.get('project_id', 0)))
@@ -501,9 +576,14 @@ class WikiPage(_Resource):
 
     @property
     def internal_id(self):
-        return self.title
+        return to_string(self.title)
 
     def __getattr__(self, item):
+        if item == 'parent' and item in self._attributes:
+            manager = ResourceManager(self.manager.redmine, 'WikiPage')
+            manager.params['project_id'] = self.manager.params.get('project_id', 0)
+            return manager.to_resource(self._attributes[item])
+
         # If a text attribute of a resource is missing, we should
         # refresh a resource automatically for user's convenience
         try:
@@ -518,13 +598,13 @@ class WikiPage(_Resource):
         return self.version
 
     def __str__(self):
-        return to_string(self.title)
+        return self.internal_id
 
     def __repr__(self):
         return '<{0}.{1} "{2}">'.format(
             self.__class__.__module__,
             self.__class__.__name__,
-            to_string(self.title)
+            self.internal_id
         )
 
 
@@ -540,7 +620,8 @@ class ProjectMembership(_Resource):
     query_update = '/memberships/{0}.json'
     query_delete = '/memberships/{0}.json'
 
-    _readonly = _Resource._readonly + ('user', 'roles')
+    _create_readonly = _Resource._create_readonly + ('user', 'roles')
+    _update_readonly = _create_readonly
 
     def __str__(self):
         return str(self.id)
@@ -617,8 +698,20 @@ class User(_Resource):
     query_delete = '/users/{0}.json'
 
     _includes = ('memberships', 'groups')
+    _relations = ('issues', 'time_entries', 'contacts', 'deals')
+    _relations_name = 'assigned_to'
     _unconvertible = ('status',)
-    _readonly = _Resource._readonly + ('api_key', 'last_login_on', 'custom_fields')
+    _create_readonly = _Resource._create_readonly + ('api_key', 'last_login_on')
+    _update_readonly = _create_readonly
+
+    def __getattr__(self, item):
+        if item == 'time_entries':
+            self._relations_name = 'user'
+            value = super(User, self).__getattr__(item)
+            self._relations_name = 'assigned_to'
+            return value
+
+        return super(User, self).__getattr__(item)
 
     def __str__(self):
         try:
@@ -709,6 +802,9 @@ class IssueStatus(_Resource):
     container_all = 'issue_statuses'
     query_all = '/issue_statuses.json'
 
+    _relations = ('issues',)
+    _relations_name = 'status'
+
     @property
     def url(self):
         return '{0}/issue_statuses/{1}/edit'.format(self.manager.redmine.url, self.internal_id)
@@ -718,6 +814,8 @@ class Tracker(_Resource):
     redmine_version = '1.3'
     container_all = 'trackers'
     query_all = '/trackers.json'
+
+    _relations = ('issues',)
 
     @property
     def url(self):
@@ -750,9 +848,242 @@ class CustomField(_Resource):
     def __getattr__(self, item):
         # If custom field was created after the creation of the resource,
         # i.e. project, and it's not used in the resource, there will be
-        # no value attribute defined, that is why we need to return 0 or
+        # no value attribute defined, that is why we need to return '' or
         # we'll get an exception
-        if item == 'value' and not item in self._attributes:
-            return 0
+        if item == 'value' and item not in self._attributes:
+            return ''
+
+        # Redmine <2.5.2 returns only single tracker instead of a list of
+        # all available trackers, see http://www.redmine.org/issues/16739
+        # for details
+        elif item == 'trackers' and 'tracker' in self._attributes[item]:
+            self._attributes[item] = [self._attributes[item]['tracker']]
 
         return super(CustomField, self).__getattr__(item)
+
+
+class Note(_Resource):
+    redmine_version = '2.1'
+    requirements = (('CRM plugin', '3.2.4'),)
+    container_one = 'note'
+    query_one = '/notes/{0}.json'
+
+    def __getattr__(self, item):
+        if item == 'source' and item in self._attributes and self._attributes[item].get('type') in ('Deal', 'Contact'):
+            manager = ResourceManager(self.manager.redmine, self._attributes[item]['type'])
+            return manager.to_resource(self._attributes[item])
+
+        return super(Note, self).__getattr__(item)
+
+    def __str__(self):
+        return self.content
+
+    def __repr__(self):
+        return '<{0}.{1} #{2}>'.format(
+            self.__class__.__module__,
+            self.__class__.__name__,
+            self.id
+        )
+
+
+class Contact(_Resource):
+    redmine_version = '1.2.1'
+    requirements = ('CRM plugin',)
+    container_all = 'contacts'
+    container_one = 'contact'
+    container_filter = 'contacts'
+    container_create = 'contact'
+    container_update = 'contact'
+    query_all = '/contacts.json'
+    query_one = '/contacts/{0}.json'
+    query_filter = '/contacts.json'
+    query_create = '/projects/{project_id}/contacts.json'
+    query_update = '/contacts/{0}.json'
+    query_delete = '/contacts/{0}.json'
+
+    _includes = ('notes', 'contacts', 'deals', 'issues')
+    _unconvertible = _Resource._unconvertible + ('company', 'skype_name')
+
+    class Project:
+        """A contact project implementation"""
+        def __init__(self, contact):
+            self._redmine = contact.manager.redmine
+            self._contact_id = contact.internal_id
+
+            if self._redmine.ver is not None and LooseVersion(str(self._redmine.ver)) < LooseVersion('2.3'):
+                raise ResourceVersionMismatchError
+
+        def add(self, project_id):
+            """Adds project to contact's project list"""
+            url = '{0}/contacts/{1}/projects.json'.format(self._redmine.url, self._contact_id)
+
+            try:
+                return self._redmine.request('post', url, data={'project': {'id': project_id}})
+            except ResourceNotFoundError:
+                raise ValidationError("Attempt to add contact to a project that doesn't exist")
+            except ForbiddenError:
+                raise ValidationError(
+                    'Attempt to add contact to a project that either has contacts module disabled or is read-only')
+
+        def remove(self, project_id):
+            """Removes project from contact's project list"""
+            url = '{0}/contacts/{1}/projects/{2}.json'.format(self._redmine.url, self._contact_id, project_id)
+
+            try:
+                return self._redmine.request('delete', url)
+            except ResourceNotFoundError:
+                raise ValidationError("Attempt to remove contact from a project that doesn't exist")
+            except ForbiddenError:
+                raise ValidationError(
+                    'Attempt to remove contact from a project that either has contacts module disabled or is read-only')
+
+    @classmethod
+    def translate_params(cls, params):
+        if isinstance(params.get('tag_list'), (list, tuple)):
+            params['tag_list'] = ','.join(params['tag_list'])
+
+        if 'phones' in params:
+            params['phone'] = ','.join(params.pop('phones'))
+
+        if 'emails' in params:
+            params['email'] = ','.join(params.pop('emails'))
+
+        return super(Contact, cls).translate_params(params)
+
+    def __getattr__(self, item):
+        if item == 'project':
+            return Contact.Project(self)
+        elif item == 'phones':
+            return [p.get('number') if isinstance(p, dict) else p for p in self._attributes.get('phones', [])]
+        elif item == 'emails':
+            return [e.get('address') if isinstance(e, dict) else e for e in self._attributes.get('emails', [])]
+        elif item == 'avatar' and item in self._attributes:
+            manager = ResourceManager(self.manager.redmine, 'Attachment')
+            return manager.to_resource({'id': self._attributes[item].get('attachment_id', 0)})
+
+        return super(Contact, self).__getattr__(item)
+
+    def __str__(self):
+        try:
+            return super(Contact, self).__str__()
+        except ResourceAttrError:
+            if not getattr(self, 'last_name', False):
+                return '{0}'.format(to_string(self.first_name))
+            else:
+                return '{0} {1}'.format(to_string(self.first_name), to_string(self.last_name))
+
+    def __repr__(self):
+        try:
+            return super(Contact, self).__repr__()
+        except ResourceAttrError:
+            if not getattr(self, 'last_name', False):
+                return '<{0}.{1} #{2} "{3}">'.format(
+                    self.__class__.__module__,
+                    self.__class__.__name__,
+                    self.id,
+                    to_string(self.first_name),
+                )
+            else:
+                return '<{0}.{1} #{2} "{3} {4}">'.format(
+                    self.__class__.__module__,
+                    self.__class__.__name__,
+                    self.id,
+                    to_string(self.first_name),
+                    to_string(self.last_name)
+                )
+
+
+class ContactTag(_Resource):
+    redmine_version = '2.3'
+    requirements = (('CRM plugin', '3.4.0'),)
+    container_all = 'tags'
+    query_all = '/contacts_tags.json'
+
+    @property
+    def url(self):
+        return '{0}/contacts_tags/{1}/edit'.format(self.manager.redmine.url, self.internal_id)
+
+
+class CrmQuery(_Resource):
+    redmine_version = '2.3'
+    requirements = (('CRM plugin', '3.3.0'),)
+    container_filter = 'queries'
+    query_filter = '/crm_queries.json?object_type={resource}'
+
+    _relations = ('deals',)
+    _relations_name = 'query'
+
+    @property
+    def url(self):
+        return '{0}/projects/{1}/{2}s?query_id={3}'.format(
+            self.manager.redmine.url,
+            self._attributes.get('project_id', 0),
+            self.manager.params.get('resource', ''),
+            self.internal_id
+        )
+
+
+class Deal(_Resource):
+    redmine_version = '1.2.1'
+    requirements = ('CRM plugin',)
+    container_all = 'deals'
+    container_one = 'deal'
+    container_filter = 'deals'
+    container_create = 'deal'
+    container_update = 'deal'
+    query_all = '/deals.json'
+    query_one = '/deals/{0}.json'
+    query_filter = '/deals.json'
+    query_create = '/projects/{project_id}/deals.json'
+    query_update = '/deals/{0}.json'
+    query_delete = '/deals/{0}.json'
+
+    _includes = ('notes',)
+
+    def __getattr__(self, item):
+        if item in ('category', 'status') and item in self._attributes:
+            manager = ResourceManager(self.manager.redmine, 'Deal{0}'.format(item.capitalize()))
+            return manager.to_resource(self._attributes[item])
+
+        return super(Deal, self).__getattr__(item)
+
+    def __str__(self):
+        try:
+            return super(Deal, self).__str__()
+        except ResourceAttrError:
+            return str(self.id)
+
+    def __repr__(self):
+        try:
+            return super(Deal, self).__repr__()
+        except ResourceAttrError:
+            return '<{0}.{1} #{2}>'.format(
+                self.__class__.__module__,
+                self.__class__.__name__,
+                self.id
+            )
+
+
+class DealStatus(_Resource):
+    redmine_version = '2.3'
+    requirements = (('CRM plugin', '3.3.0'),)
+    container_all = 'deal_statuses'
+    query_all = '/deal_statuses.json'
+
+    _relations = ('deals',)
+    _relations_name = 'status'
+
+    @property
+    def url(self):
+        return '{0}/deal_statuses/{1}/edit'.format(self.manager.redmine.url, self.internal_id)
+
+
+class DealCategory(_Resource):
+    redmine_version = '2.3'
+    requirements = (('CRM plugin', '3.3.0'),)
+    container_filter = 'deal_categories'
+    query_filter = '/projects/{project_id}/deal_categories.json'
+
+    @property
+    def url(self):
+        return '{0}/deal_categories/edit?id={1}'.format(self.manager.redmine.url, self.internal_id)
