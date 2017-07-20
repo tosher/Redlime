@@ -55,7 +55,8 @@ Example:
         { "prop": "priority", "colname": "Prior.", "custom": false},
         { "prop": "status", "colname": "Status", "custom": false},
         { "prop": "assigned_to", "colname": "Assigned", "custom": false},
-        { "prop": "subject", "colname": "Subject", "custom": false, "maxlen": 80}
+        { "prop": "subject", "colname": "Subject", "custom": false, "maxlen": 80},
+        { "prop": "done_ratio", "colname": "% Done", "custom": false, "type": "progressbar"},
     ],
     "issue_view_columns": [
         { "prop": "id", "colname": "Issue", "custom": false},
@@ -63,6 +64,7 @@ Example:
         { "prop": "fixed_version", "colname": "Version", "custom": false},
         { "prop": "status", "colname": "Status", "custom": false},
         { "prop": "priority", "colname": "Priority", "custom": false},
+        { "prop": "done_ratio", "colname": "Done ratio", "custom": false, "type": "percentage"},
         { "prop": "author", "colname": "Author", "custom": false},
         { "prop": "assigned_to", "colname": "Assigned to", "custom": false},
         { "prop": "created_on", "colname": "Creation date", "custom": false, "type": "datetime"},

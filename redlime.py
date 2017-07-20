@@ -30,6 +30,17 @@ def rl_get_datetime(datetime_str):
     except AttributeError:
         return datetime_str.replace('T', ' ').replace('Z', '')
 
+def rl_get_percentage(percentage):
+    if percentage == '100':
+        return '100%'
+    else:
+        return '%02s %%' % percentage
+
+def rl_get_progressbar(percentage):
+    n = int(int(percentage) / 10)
+    positive = '█' * n
+    negative = '░' * (10 - n)
+    return '%s%s' % (positive, negative)
 
 def rl_get_custom_value(redmine, field_type, field):
     if field_type == 'version' and isinstance(field['value'], list):
@@ -600,6 +611,10 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
                 value = rl_get_safe(issue, col_prop)
                 if field_type == 'datetime':
                     value = rl_get_datetime(value)
+                elif field_type == 'percentage':
+                    value = rl_get_percentage(value)
+                elif field_type == 'progressbar':
+                    value = rl_get_progressbar(value)
             elif hasattr(issue, 'custom_fields'):
                 for field in issue.custom_fields:
                     if field['name'] == col_prop:
@@ -741,12 +756,15 @@ def rl_show_cases(**kwargs):
                         value = rl_get_safe(issue, col_prop)
                         if field_type == 'datetime':
                             value = rl_get_datetime(value)
+                        elif field_type == 'percentage':
+                            value = rl_get_percentage(value)
+                        elif field_type == 'progressbar':
+                            value = rl_get_progressbar(value)
                     elif hasattr(issue, 'custom_fields'):
                         for field in issue.custom_fields:
                             if field['name'] == col_prop:
                                 value = rl_get_custom_value(redmine, field_type, field)
                                 break
-
                     value_len = len(cut(value, maxlen))
                     if value_len > cols_data[col_prop]:
                         cols_data[col_prop] = value_len
@@ -820,6 +838,10 @@ def rl_show_cases(**kwargs):
                         value = rl_get_safe(issue, col_prop)
                         if field_type == 'datetime':
                             value = rl_get_datetime(value)
+                        elif field_type == 'percentage':
+                            value = rl_get_percentage(value)
+                        elif field_type == 'progressbar':
+                            value = rl_get_progressbar(value)
                     elif hasattr(issue, 'custom_fields'):
                         for field in issue.custom_fields:
                             if field['name'] == col_prop:
