@@ -46,6 +46,12 @@
         ]
     },
     {
+        "keys": ["%"], "command": "redlime_done_ratio_issue",
+        "context": [
+            {"key": "setting.redlime_issue", "operand": true}
+        ]
+    },
+    {
         "keys": ["v"], "command": "redlime",
         "context": [
             {"key": "setting.redlime_query", "operand": true}

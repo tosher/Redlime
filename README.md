@@ -91,6 +91,7 @@ Example:
 * <kbd>F2</kbd> Redlime issue: Change subject
 * <kbd>a</kbd> Redlime issue: Assign to
 * <kbd>p</kbd> Redlime issue: Change priority
+* <kbd>%</kbd> Redlime issue: Change done ratio
 * <kbd>g</kbd> Redlime issue: Open in browser
 * <kbd>l</kbd> Redlime issue: Open selected link
 * <kbd>d</kbd> Redlime issue: Change description
