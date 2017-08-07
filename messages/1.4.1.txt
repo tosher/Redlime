@@ -1,0 +1,4 @@
+Redlime 1.4.1 changelog:
+
+* Done ratio of the issues - thanx for pull-request to [gimco](https://github.com/gimco);
+
