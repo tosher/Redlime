@@ -30,6 +30,17 @@ def rl_get_datetime(datetime_str):
     except AttributeError:
         return datetime_str.replace('T', ' ').replace('Z', '')
 
+def rl_get_percentage(percentage):
+    if percentage == '100':
+        return '100%'
+    else:
+        return '%02s %%' % percentage
+
+def rl_get_progressbar(percentage):
+    n = int(int(percentage) / 10)
+    positive = '█' * n
+    negative = '░' * (10 - n)
+    return '%s%s' % (positive, negative)
 
 def rl_get_custom_value(redmine, field_type, field):
     if field_type == 'version' and isinstance(field['value'], list):
@@ -368,6 +379,29 @@ class RedlimeSetAssignedCommand(sublime_plugin.TextCommand):
                 sublime.set_timeout(lambda: sublime.active_window().show_quick_panel(users_menu, on_done), 1)
 
 
+# Issue done_ratio
+class RedlimeDoneRatioIssueCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        def on_done(idx):
+            if idx >= 0:
+                issue.done_ratio = int(enums[idx])
+                issue.save()
+                sublime.status_message('Done ratio changed!')
+                self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
+
+        # validate
+        rl_validate_screen('redlime_issue')
+
+        issue_id = self.view.settings().get('issue_id', None)
+        if issue_id:
+            redmine = Redlime.connect()
+            issue = redmine.issue.get(issue_id)
+            # https://github.com/redmine/redmine/blob/3.4-stable/app/views/issues/_attributes.html.erb#L72
+            enums = [str(10 * x) for x in range(0, 11)]
+
+            sublime.set_timeout(lambda: self.view.window().show_quick_panel(enums, on_done), 1)
+
+
 class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
     def run(self, edit):
 
@@ -428,6 +462,8 @@ class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
                                 self.view.run_command('redlime_set_assigned')
                             elif col_prop == 'priority':
                                 self.view.run_command('redlime_priority_issue')
+                            elif col_prop == 'done_ratio':
+                                self.view.run_command('redlime_done_ratio_issue')
                             else:
                                 sublime.message_dialog('Not implemented in this version')
 
@@ -575,6 +611,10 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
                 value = rl_get_safe(issue, col_prop)
                 if field_type == 'datetime':
                     value = rl_get_datetime(value)
+                elif field_type == 'percentage':
+                    value = rl_get_percentage(value)
+                elif field_type == 'progressbar':
+                    value = rl_get_progressbar(value)
             elif hasattr(issue, 'custom_fields'):
                 for field in issue.custom_fields:
                     if field['name'] == col_prop:
@@ -597,6 +637,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             '[b](change custom field)',
             '[a](assing to)',
             '[p](change priority)',
+            '[%](change done ratio)',
             '[m](move to project)',
             '[r](refresh issue)',
             '[g](open in browser)',
@@ -715,12 +756,15 @@ def rl_show_cases(**kwargs):
                         value = rl_get_safe(issue, col_prop)
                         if field_type == 'datetime':
                             value = rl_get_datetime(value)
+                        elif field_type == 'percentage':
+                            value = rl_get_percentage(value)
+                        elif field_type == 'progressbar':
+                            value = rl_get_progressbar(value)
                     elif hasattr(issue, 'custom_fields'):
                         for field in issue.custom_fields:
                             if field['name'] == col_prop:
                                 value = rl_get_custom_value(redmine, field_type, field)
                                 break
-
                     value_len = len(cut(value, maxlen))
                     if value_len > cols_data[col_prop]:
                         cols_data[col_prop] = value_len
@@ -794,6 +838,10 @@ def rl_show_cases(**kwargs):
                         value = rl_get_safe(issue, col_prop)
                         if field_type == 'datetime':
                             value = rl_get_datetime(value)
+                        elif field_type == 'percentage':
+                            value = rl_get_percentage(value)
+                        elif field_type == 'progressbar':
+                            value = rl_get_progressbar(value)
                     elif hasattr(issue, 'custom_fields'):
                         for field in issue.custom_fields:
                             if field['name'] == col_prop:
