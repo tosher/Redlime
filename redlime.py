@@ -635,7 +635,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             '[s](change state)',
             '[v](change version)',
             '[b](change custom field)',
-            '[a](assing to)',
+            '[a](assign to)',
             '[p](change priority)',
             '[%](change done ratio)',
             '[m](move to project)',
