@@ -5,6 +5,9 @@
     "projects_filter": [],
     "assigned_to_group_id_filter": [],
     "syntax_file": "Packages/Redlime/Redlime.tmLanguage",
+    // "syntax_file_edit": "Packages/Markdown/Markdown.sublime-syntax",
+    "syntax_file_edit": "",
+    "edit_height_percent": 70,
     "external_wiki_field": "",
     "query_page_size": 40,
     "issue_list_columns": [

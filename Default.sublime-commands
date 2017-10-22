@@ -1,9 +1,9 @@
 [
    { "caption": "Redlime: Project issues", "command": "redlime_project_issues" },
    { "caption": "Redlime: List queries", "command": "redlime_get_query" },
-   { "caption": "Redlime: View issue", "command": "redlime" },
+   { "caption": "Redlime: View issue", "command": "redlime_issue" },
    { "caption": "Redlime issue: Refresh", "command": "redlime_refresh_issue" },
-   { "caption": "Redlime issue: Post comment", "command": "redlime_comment_issue" },
+   { "caption": "Redlime issue: Add comment", "command": "redlime_issue_add_comment" },
    { "caption": "Redlime issue: Change version", "command": "redlime_version_issue" },
    { "caption": "Redlime issue: Set status", "command": "redlime_set_status" },
    { "caption": "Redlime issue: Change project", "command": "redlime_change_project" },
@@ -22,5 +22,6 @@
    { "caption": "Redlime issue: Magic enter", "command": "redlime_magic_enter" },
    { "caption": "Redlime issue: Toggle select mode", "command": "redlime_toggle_selectable" },
    { "caption": "Redlime: Previous page", "command": "redlime_issues_page", "args": {"direction": 0} },
-   { "caption": "Redlime: Next page", "command": "redlime_issues_page", "args": {"direction": 1} }
+   { "caption": "Redlime: Next page", "command": "redlime_issues_page", "args": {"direction": 1} },
+   { "caption": "Redlime: Save edit", "command": "redlime_editbox_save" }
 ]

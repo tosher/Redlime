@@ -1,0 +1,6 @@
+Redlime 1.5.0 changelog:
+
+* Edit issue description and comments in separate view
+* Commands refactoring
+* Key binding contexts and some commands names were changed - requires user's key bindings to recreate
+

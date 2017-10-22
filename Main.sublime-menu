@@ -15,29 +15,22 @@
                         "caption": "Redlime",
                         "children":
                         [
+
                             {
-                                "command": "open_file",
+                                "command": "edit_settings",
                                 "args": {
-                                    "file": "${packages}/Redlime/Redlime.sublime-settings"
+                                    "base_file": "${packages}/Redlime/Redlime.sublime-settings",
+                                    "default": "{\n\t$0\n}\n"
                                 },
-                                "caption": "Settings – Default"
+                                "caption": "Settings"
                             },
                             {
-                                "command": "open_file",
+                                "command": "edit_settings",
                                 "args": {
-                                    "file": "${packages}/User/Redlime.sublime-settings"
+                                    "base_file": "${packages}/Redlime/Default.sublime-keymap",
+                                    "default": "[\n\t$0\n]\n"
                                 },
-                                "caption": "Settings – User"
-                            },
-                            {
-                                "command": "open_file",
-                                "args": {"file": "${packages}/Redlime/Default.sublime-keymap"},
-                                "caption": "Key Bindings – Default"
-                            },
-                            {
-                                "command": "open_file",
-                                "args": {"file": "${packages}/User/Redlime.sublime-keymap"},
-                                "caption": "Key Bindings – User"
+                                "caption": "Key Bindings"
                             }
                         ]
                     }
