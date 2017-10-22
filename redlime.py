@@ -14,6 +14,7 @@ class RedlimeViewEvents(sublime_plugin.ViewEventListener):
                 if isinstance(operand, list):
                     return self.view.settings().get('screen', None) in operand
                 else:
+
                     # print(key, operand, type(operand), operand == view.settings().get('screen', None))
                     return operand == self.view.settings().get('screen', None)
             if operator == sublime.OP_NOT_EQUAL:
