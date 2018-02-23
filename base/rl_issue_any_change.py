@@ -55,6 +55,8 @@ class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
                                 self.view.run_command('redlime_version_issue')
                             elif col_prop == 'status':
                                 self.view.run_command('redlime_set_status')
+                            elif col_prop == 'tracker':
+                                self.view.run_command('redlime_tracker_issue')
                             elif col_prop == 'project':
                                 self.view.run_command('redlime_change_project')
                             elif col_prop == 'assigned_to':

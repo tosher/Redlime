@@ -10,6 +10,11 @@
     "edit_height_percent": 70,
     "external_wiki_field": "",
     "query_page_size": 40,
+    "issue_default_estimated_hours": 48,
+    "char_right_arrow": "⮕", // →
+    "char_left_arrow": "⬅", // ←
+    "progress_bar_positive_char": "■", // █ +
+    "progress_bar_negative_char": "□", // ░ -
     "issue_list_columns": [
         { "prop": "id", "colname": "#", "custom": false, "align": "right" },
         { "prop": "fixed_version", "colname": "Version", "custom": false},
@@ -24,10 +29,11 @@
     "issue_view_columns": [
         { "prop": "id", "colname": "Issue", "custom": false},
         { "prop": "project", "colname": "Project", "custom": false},
+        { "prop": "tracker", "colname": "Type", "custom": false},
         { "prop": "fixed_version", "colname": "Version", "custom": false},
         { "prop": "status", "colname": "Status", "custom": false},
         { "prop": "priority", "colname": "Priority", "custom": false},
-        { "prop": "done_ratio", "colname": "Done ratio", "custom": false, "type": "percentage"},
+        { "prop": "done_ratio", "colname": "Done ratio", "custom": false, "type": "progressbar"},
         { "prop": "author", "colname": "Author", "custom": false},
         { "prop": "assigned_to", "colname": "Assigned to", "custom": false},
         { "prop": "created_on", "colname": "Creation date", "custom": false, "type": "datetime"},

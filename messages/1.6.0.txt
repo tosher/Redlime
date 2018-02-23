@@ -1,0 +1,7 @@
+Redlime 1.6.0 changelog:
+
+* Create issue command
+* Issue tracker change support
+* Drawing tables with [terminaltables](https://robpol86.github.io/terminaltables/)
+* New shortcuts menu
+

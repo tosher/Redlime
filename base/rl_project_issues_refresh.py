@@ -10,10 +10,12 @@ from . import rl_utils as utils
 class RedlimeIssuesRefreshCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         query_params = self.view.settings().get('query_params')
+        title = self.view.settings().get('title')
         limit = utils.rl_get_setting('query_page_size', 40)
         query_params['limit'] = limit
         if query_params:
-            text = utils.rl_show_cases(**query_params)
+            # text = utils.rl_show_cases(**query_params)
+            text = utils.rl_show_issues(title=title, **query_params)
             self.view.set_read_only(False)
             self.view.erase(edit, sublime.Region(0, self.view.size()))
             self.view.run_command('redlime_insert_text', {'position': 0, 'text': text})

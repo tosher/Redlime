@@ -3,6 +3,7 @@
 
 # import sublime
 import sublime_plugin
+from . import rl_utils as utils
 
 
 class RedlimeIssueCommand(sublime_plugin.TextCommand):
@@ -10,7 +11,7 @@ class RedlimeIssueCommand(sublime_plugin.TextCommand):
         if not issue_id:
             try:
                 line = self.view.substr(self.view.line(self.view.sel()[0].end()))
-                issue_id = line.split('|')[1].strip()
+                issue_id = line.split(utils.TABLE_SEP)[1].strip()
                 int(issue_id)  # check is number
             except Exception:
                 pass
@@ -23,3 +24,4 @@ class RedlimeIssueCommand(sublime_plugin.TextCommand):
 
     def get_issue(self, issue_id):
         self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
+

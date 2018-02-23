@@ -4,6 +4,7 @@ SublimeText 3 plugin to manage Redmine issues.
 Concept idea based on another plugin (fork): [SubRed](https://packagecontrol.io/packages/SubRed), but with many differences and improvements:
 
  * Fully customizable issue fields - default and custom.
+ * Create new issues.
  * Edit all issue properties.
  * Show/open issue dependencies, subissues, attachments.
  * Redmine project as main path to issues (queries are supported too).

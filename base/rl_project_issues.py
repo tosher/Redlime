@@ -28,13 +28,21 @@ class RedlimeProjectIssuesCommand(sublime_plugin.TextCommand):
         if idx >= 0:
             title = 'Issues: %s' % self.prj_names[idx]
             limit = utils.rl_get_setting('query_page_size', 40)
-            query_params = {'project_id': self.prj_ids[idx], 'title': title, 'limit': limit, 'offset': 0, 'page_number': 1}
-            text = utils.rl_show_cases(**query_params)
+            query_params = {
+                'project_id': self.prj_ids[idx],
+                'limit': limit,
+                'offset': 0,
+                'page_number': 1,
+                'status_id': 'open'
+            }
+            # text = utils.rl_show_cases(**query_params)
+            text = utils.rl_show_issues(title=title, **query_params)
             r = self.view.window().new_file()
             r.set_name(title)
             syntax_file = utils.rl_get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
             r.set_syntax_file(syntax_file)
             r.settings().set('query_params', query_params)
+            r.settings().set('title', title)
             r.settings().set('screen', 'redlime_query')
             r.settings().set("word_wrap", False)
             r.run_command('redlime_insert_text', {'position': 0, 'text': text})

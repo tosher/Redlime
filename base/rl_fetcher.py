@@ -76,35 +76,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
 
         header_print = '## %s\n' % (issue.subject)
 
-        shortcuts = [
-            '[f2](change subject)',
-            '[c](post a comment)',
-            '[s](change state)',
-            '[v](change version)',
-            '[b](change custom field)',
-            '[a](assing to)',
-            '[p](change priority)',
-            '[%](change done ratio)',
-            '[m](move to project)',
-            '[r](refresh issue)',
-            '[g](open in browser)',
-            '[w](open external wiki)',
-            '[l](open selected link)',
-            '[d](change description)',
-            '[i](open selected issue)',
-            '[u](toggle select mode)',
-            '[Enter](*magic)']
-
-        shortcuts_print = ''
-        maxlen = len(max(shortcuts, key=len)) + 2
-
-        for idx, s in enumerate(shortcuts):
-            idx += 1
-            line_format = '{:<%s}\n' % (maxlen) if not idx % 5 else '{:<%s}' % maxlen
-            shortcuts_print += line_format.format(s)
-
         content = ''
-        content += shortcuts_print
         content += '\n'
         content += '\n'
         content += header_print

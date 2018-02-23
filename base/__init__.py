@@ -30,12 +30,15 @@ from .rl_project_issues_filter import RedlimeAssignFilterCommand
 from .rl_project_issues_refresh import RedlimeIssuesRefreshCommand
 from .rl_project_issues_page import RedlimeIssuesPageCommand
 from .rl_query_issues import RedlimeFetchQueryCommand
+from .rl_issue_create import RedlimeIssueCreateCommand
+from .rl_issue_tracker_change import RedlimeTrackerIssueCommand
 
 
 __all__ = [
     'RedlimeEditboxSaveCommand',
     'RedlimeEditboxCancelCommand',
     'RedlimeIssueCommand',
+    'RedlimeIssueCreateCommand',
     'RedlimeMagicEnterCommand',
     'RedlimeSetAssignedCommand',
     'RedlimeGoRedmineCommand',
@@ -47,6 +50,7 @@ __all__ = [
     'RedlimeDoneRatioIssueCommand',
     'RedlimeOpenLinkCommand',
     'RedlimePriorityIssueCommand',
+    'RedlimeTrackerIssueCommand',
     'RedlimeChangeProjectCommand',
     'RedlimeRefreshIssueCommand',
     'RedlimeToggleSelectableCommand',

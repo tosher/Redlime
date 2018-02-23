@@ -84,6 +84,12 @@
         ]
     },
     {
+        "keys": ["n"], "command": "redlime_issue_create",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    },
+    {
         "keys": ["w"], "command": "redlime_open_wiki",
         "context": [
             {"key": "rl_screen", "operand": "redlime_issue"}

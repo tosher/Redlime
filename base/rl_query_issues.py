@@ -17,9 +17,17 @@ class RedlimeFetchQueryCommand(sublime_plugin.TextCommand):
         r.set_syntax_file(syntax_file)
         limit = utils.rl_get_setting('query_page_size', 40)
         page_number = 1
-        query_params = {'project_id': project_id, 'query_id': query_id, 'title': title, 'limit': limit, 'offset': 0, 'page_number': page_number}
-        content = utils.rl_show_cases(**query_params)
+        query_params = {
+            'project_id': project_id,
+            'query_id': query_id,
+            'limit': limit,
+            'offset': 0,
+            'page_number': page_number,
+            'status_id': 'open'
+        }
+        content = utils.rl_show_issues(title=title, **query_params)
         r.settings().set('query_params', query_params)
+        r.settings().set('title', title)
         r.settings().set('screen', 'redlime_query')
 
         r.settings().set("word_wrap", False)

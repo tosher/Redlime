@@ -1,7 +1,7 @@
 #!/usr/bin/env python\n
 # -*- coding: utf-8 -*-
 
-import sublime
+# import sublime
 import sublime_plugin
 from . import rl_utils as utils
 from .rl_utils import Redlime

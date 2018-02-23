@@ -3,22 +3,14 @@
 
 import sys
 import os
+from collections import OrderedDict
 import sublime
 import sublime_plugin
 sys.path.append(os.path.join(os.path.dirname(__file__), "../libs"))
 from ..libs.redmine import Redmine
+from ..libs.terminaltables.other_tables import WindowsTable as SingleTable
 
-
-object_commands = {
-    'issue': {
-        'char': '#',
-        'screen_view': 'redlime_issue',
-        'screen_list': 'redlime_query'
-        # 'view': 'st_gitlab_issue',
-        # 'list': 'st_gitlab_project_issues_list',
-        # 'fetch': 'st_gitlab_issue_fetcher'
-    }
-}
+TABLE_SEP = '│'
 
 
 class Redlime:
@@ -63,14 +55,14 @@ def rl_get_percentage(percentage):
     if percentage == '100':
         return '100%'
     else:
-        return '%02s %%' % percentage
+        return '%02s%%' % percentage
 
 
 def rl_get_progressbar(percentage):
     n = int(int(percentage) / 10)
-    positive = '█' * n
-    negative = '░' * (10 - n)
-    return '%s%s' % (positive, negative)
+    positive = rl_get_setting('progress_bar_positive_char', '+') * n
+    negative = rl_get_setting('progress_bar_negative_char', '-') * (10 - n)
+    return '%s%s %s%%' % (positive, negative, percentage)
 
 
 def rl_get_custom_value(redmine, field_type, field):
@@ -100,138 +92,114 @@ def rl_prepare_custom_value(redmine, field_type, field, issue_id, value):
         return value
 
 
-# def rl_validate_screen(screen):
-#     is_valid = sublime.active_window().active_view().settings().get(screen, False)
-#     if not is_valid:
-#         if screen == 'redlime_issue':
-#             sublime.message_dialog('This command is provided for the issue screen!')
-#         elif screen == 'redlime_query':
-#             sublime.message_dialog('This command is provided for the issues query!')
-#         else:
-#             sublime.message_dialog('This command is provided for Redlime view!')
+def rl_get_issue_column_value(redmine, col, issue):
+    value = ''
+    col_type = col.get('type', None)
+    if not col['custom']:
+        value = rl_get_safe(issue, col['prop'])
+        if col_type == 'datetime':
+            value = rl_get_datetime(value)
+        elif col_type == 'percentage':
+            value = rl_get_percentage(value)
+        elif col_type == 'progressbar':
+            value = rl_get_progressbar(value)
+    elif hasattr(issue, 'custom_fields'):
+        for field in issue.custom_fields:
+            if field['name'] == col['prop']:
+                value = rl_get_custom_value(redmine, col_type, field)
+                break
+    return value
 
-def rl_show_cases(**kwargs):
 
-    def get_data():
-        cols_data = {}
+def rl_get_issues_header(title, count, page_number):
+    content_header = '\n## %s\n\n' % title
+    content_header += 'Total: %s\n' % count
+    content_header += 'Page number: %s\n\n' % page_number
+    return content_header
 
-        for col in cols:
-            cols_data[col['prop']] = len(col['colname'])
 
-        if cols:
-            for issue in issues:
-                for col in cols:
-
-                    value = ''
-                    maxlen = col.get('maxlen', None)
-                    field_type = col.get('type', None)
-                    col_prop = col['prop']
-
-                    if not col['custom']:
-                        value = rl_get_safe(issue, col_prop)
-                        if field_type == 'datetime':
-                            value = rl_get_datetime(value)
-                        elif field_type == 'percentage':
-                            value = rl_get_percentage(value)
-                        elif field_type == 'progressbar':
-                            value = rl_get_progressbar(value)
-                    elif hasattr(issue, 'custom_fields'):
-                        for field in issue.custom_fields:
-                            if field['name'] == col_prop:
-                                value = rl_get_custom_value(redmine, field_type, field)
-                                break
-                    value_len = len(cut(value, maxlen))
-                    if value_len > cols_data[col_prop]:
-                        cols_data[col_prop] = value_len
-        return cols_data
-
-    def cut(val, maxlen):
-        if maxlen:
-            if len(val) > maxlen:
-                return '%s..' % val[:maxlen - 2].strip()
-        return val
-
-    def pretty(value, length, align='left'):
-
-        align_sign = '<'
-        if align == 'left':
-            align_sign = '<'
-        elif align == 'center':
-            align_sign = '^'
-        elif align == 'right':
-            align_sign = '>'
-
-        line_format = '{:%s%s}' % (align_sign, length)
-        return line_format.format(value)
-
-    def get_subline(lenval):
-        # lenval + 2 spaces in column
-        return '-' * (lenval + 2)
-
+def rl_show_issues(title, **kwargs):
+    content = ''
     redmine = Redlime.connect()
+    issues = redmine.issue.filter(**kwargs)
+
     cols = rl_get_setting('issue_list_columns', {})
-    if cols:
-        content = ''
-        redmine = Redlime.connect()
+    tbl_header = [col['colname'] for col in cols]
+    table_data = [tbl_header]
+    content += rl_get_issues_header(title, len(issues), kwargs.get('page_number', 1))
 
-        shortcuts = [
-            '[Enter](view issue)',
-            '[r](refresh issues)',
-            '[<-](prev. page)',
-            '[->](next page)']
+    if not issues:
+        return content + SingleTable([["Issues not found"]]).table
 
-        if not kwargs.get('query_id', None):
-            shortcuts.append('[a](assign filter)')
+    for issue in issues:
+        issue_cols = []
+        for col in cols:
+            value = rl_get_issue_column_value(redmine, col, issue)
+            issue_cols.append(value)
+        table_data.append(issue_cols)
 
-        content_header = '%s\n\n' % ' '.join(shortcuts)
-        if kwargs.get('title', None):
-            content_header += '## %s\n' % kwargs['title']
-            kwargs.pop("title", None)  # hack: title is not query param
+    objects_table = SingleTable(table_data)
+    return content + objects_table.table
 
-        kwargs['status_id'] = 'open'  # force filter opened issues
-        issues = redmine.issue.filter(**kwargs)
 
-        content_header += 'Total: %s\n' % len(issues)
-        content_header += 'Page number: %s\n\n' % kwargs.get('page_number', 1)
+object_commands = {
+    'issue': {
+        'char': '#',
+        'screen_view': 'redlime_issue',
+        'screen_list': 'redlime_query'
+        # 'view': 'st_gitlab_issue',
+        # 'list': 'st_gitlab_project_issues_list',
+        # 'fetch': 'st_gitlab_issue_fetcher'
+    }
+}
 
-        table_data_widths = get_data()
-        content_header_line = '%s-\n' % ('-' * (sum([val for key, val in table_data_widths.items()]) + len(cols) * 3))
-        table_header = '| ' + ' | '.join(pretty(col['colname'], table_data_widths[col['prop']], 'center') for col in cols)
-        table_header = '%s |\n' % table_header
+shortcuts_issue_list_query = OrderedDict([
+    ('new', ['n', 'new issue']),
+    ('edit', ['Enter', 'edit issue']),
+    ('refresh', ['r', 'refresh issues']),
+    ('ppage', [rl_get_setting('char_left_arrow'), 'prev. page']),
+    ('npage', [rl_get_setting('char_right_arrow'), 'next page'])
+])
 
-        if issues:
-            for issue in issues:
-                table_row = '|'
-                for col in cols:
+cols_issue_list_query = [
+    ['new'],
+    ['edit'],
+    ['refresh'],
+    ['ppage'],
+    ['npage']
+]
 
-                    value = ''
-                    maxlen = col.get('maxlen', None)
-                    field_type = col.get('type', None)
-                    col_prop = col['prop']
+shortcuts_issue_list_project = shortcuts_issue_list_query.copy()
+shortcuts_issue_list_project['assign'] = ['a', 'assign filter']
 
-                    if not col['custom']:
-                        value = rl_get_safe(issue, col_prop)
-                        if field_type == 'datetime':
-                            value = rl_get_datetime(value)
-                        elif field_type == 'percentage':
-                            value = rl_get_percentage(value)
-                        elif field_type == 'progressbar':
-                            value = rl_get_progressbar(value)
-                    elif hasattr(issue, 'custom_fields'):
-                        for field in issue.custom_fields:
-                            if field['name'] == col_prop:
-                                value = rl_get_custom_value(redmine, field_type, field)
-                                break
+cols_issue_list_project = cols_issue_list_query[:]
+cols_issue_list_project.insert(3, ['assign'])
 
-                    value = cut(value, maxlen)
-                    align = col.get('align', 'left')
-                    table_row += ' %s |' % pretty(value, table_data_widths[col_prop], align)
-                table_row += '\n'
-                content += table_row
-        else:
-            text = 'No data'
-            line_format = '|{:^%s}|\n' % (len(content_header_line) - 3)
-            content += line_format.format(text)
+shortcuts_issue_edit = OrderedDict([
+    ('subject', ['F2', 'change subject']),
+    ('comment', ['c', 'new comment']),
+    ('state', ['s', 'change state']),
+    ('version', ['v', 'change version']),
+    ('custom', ['b', 'change custom field']),
+    ('assign', ['a', 'assign to']),
+    ('priority', ['p', 'change priority']),
+    ('ratio', ['%', 'change done ratio']),
+    ('project', ['m', 'move to project']),
+    ('refresh', ['r', 'refresh issue']),
+    ('browser', ['g', 'open in browser']),
+    ('wiki', ['w', 'open external wiki']),
+    ('link', ['l', 'open selected link']),
+    ('descr', ['d', 'change description']),
+    ('issue', ['i', 'open selected issue']),
+    ('mode', ['u', 'toggle select mode']),
+    ('any', ['Enter', 'change any'])
+])
 
-        content_footer_line = content_header_line.replace('|', '-')
-        return content_header + content_header_line + table_header + content_header_line + content + content_footer_line
+cols_issue_edit = [
+    ['refresh', 'subject', 'descr'],
+    ['comment', 'ratio', 'assign'],
+    ['state', 'version', 'priority'],
+    ['project', 'custom', 'any'],
+    ['ratio', 'mode', 'wiki'],
+    ['browser', 'link', 'issue']
+]

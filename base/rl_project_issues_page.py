@@ -10,6 +10,7 @@ from . import rl_utils as utils
 class RedlimeIssuesPageCommand(sublime_plugin.TextCommand):
     def run(self, edit, direction):
         query_params = self.view.settings().get('query_params')
+        title = self.view.settings().get('title')
         limit = utils.rl_get_setting('query_page_size', 40)
         offset = query_params.get('offset', 0)
         page_number = query_params.get('page_number', 1)
@@ -27,7 +28,8 @@ class RedlimeIssuesPageCommand(sublime_plugin.TextCommand):
         self.view.settings().set('query_params', query_params)
 
         if query_params:
-            text = utils.rl_show_cases(**query_params)
+            # text = utils.rl_show_cases(**query_params)
+            text = utils.rl_show_issues(title=title, **query_params)
             self.view.set_read_only(False)
             self.view.erase(edit, sublime.Region(0, self.view.size()))
             self.view.run_command('redlime_insert_text', {'position': 0, 'text': text})
