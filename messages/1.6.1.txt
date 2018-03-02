@@ -2,6 +2,6 @@ Redlime 1.6.1 changelog:
 
 * Ability to create time entries for project/issue
     - Command *Redlime time entry: Create*
-    - Shortcut <kbd>t</kbd>kbd> on issue tab
+    - Shortcut `t` on issue tab
 * Show time entries for issue
 
