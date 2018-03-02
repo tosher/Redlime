@@ -24,6 +24,12 @@
         ]
     },
     {
+        "keys": ["t"], "command": "redlime_time_entry_create",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
         "keys": ["r"], "command": "redlime_refresh_issue",
         "context": [
             {"key": "rl_screen", "operand": "redlime_issue"}

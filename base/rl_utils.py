@@ -192,12 +192,13 @@ shortcuts_issue_edit = OrderedDict([
     ('descr', ['d', 'change description']),
     ('issue', ['i', 'open selected issue']),
     ('mode', ['u', 'toggle select mode']),
-    ('any', ['Enter', 'change any'])
+    ('any', ['Enter', 'change any']),
+    ('time_entry', ['t', 'time entry'])
 ])
 
 cols_issue_edit = [
     ['refresh', 'subject', 'descr'],
-    ['comment', 'ratio', 'assign'],
+    ['comment', 'assign', 'time_entry'],
     ['state', 'version', 'priority'],
     ['project', 'custom', 'any'],
     ['ratio', 'mode', 'wiki'],

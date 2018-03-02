@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import urllib
+from operator import attrgetter
+from datetime import timedelta
 import sublime
 import sublime_plugin
 from . import rl_utils as utils
 from .rl_utils import Redlime
+from ..libs.terminaltables.other_tables import WindowsTable as SingleTable
 
 BLOCK_LINE = '```\n'
 
@@ -14,8 +17,8 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
     def run(self, edit, issue_id):
         try:
             self.redlime_view(edit, issue_id)
-        except Exception:
-            sublime.status_message('Issue #%s not found!' % (issue_id))
+        except Exception as e:
+            sublime.status_message('Issue #%s not found! (%s)' % (issue_id, e))
 
     def redlime_view(self, edit, issue_id):
 
@@ -144,6 +147,36 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
                 project = self.redmine.project.get(issue.project.id)
                 chset_url = '%s/projects/%s/repository/revisions/%s' % (redmine_url.rstrip('/'), project.identifier, chset['revision'])
                 content += '\t[%s](%s)\n\t**Comment**: %s *(%s)*\n' % (chset['user']['name'], chset_url, chset['comments'], utils.rl_get_datetime(chset['committed_on']))
+            content += BLOCK_LINE
+            content += '\n'
+
+        if issue.time_entries:
+            content += '## Time entries\n'
+            content += BLOCK_LINE
+            te_table = [['User', 'Hours', 'Spent on', 'Activity', 'Comment']]
+            hours = 0
+            users = []
+            date_from = min(issue.time_entries, key=attrgetter('spent_on')).spent_on
+            date_to = max(issue.time_entries, key=attrgetter('spent_on')).spent_on
+
+            for te in sorted(issue.time_entries, key=lambda x: x.spent_on, reverse=False):
+                te_cols = [te.user, round(te.hours, 2), te.spent_on, te.activity, te.comments]
+                te_table.append(te_cols)
+                hours += te.hours
+                if te.user.name not in users:
+                    users.append(te.user.name)
+            st = SingleTable(te_table)
+            st.justify_columns[1] = 'right'
+            content += st.table
+            content += '\n'
+            content += '**Time summary**: %s hours, from %s to %s, %s days, %s contributor(s)' % (
+                round(hours, 2),
+                date_from,
+                date_to,
+                (date_to - date_from).days,
+                len(users)
+            )
+            content += '\n'
             content += BLOCK_LINE
             content += '\n'
 
