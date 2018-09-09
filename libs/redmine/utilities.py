@@ -1,24 +1,74 @@
+"""
+Provides helper utilities.
+"""
+
 import sys
+import copy
 import string
+import functools
 
 
-def is_string(string):
-    """Python 2 and 3 friendly function to check if a string is really a string"""
-    return isinstance(string, basestring if sys.version_info[0] < 3 else str)
+def fix_unicode(cls):
+    """
+    A class decorator that defines __unicode__, makes __str__ and __repr__
+    return a utf-8 encoded string and encodes unicode exception messages
+    to utf-8 encoded strings under Python 2. Does nothing under Python 3.
+
+    :param class cls: (required). A class where unicode should be fixed.
+    """
+    if sys.version_info[0] >= 3:
+        return cls
+
+    def decorator(fn):
+        @functools.wraps(fn, assigned=('__name__', '__doc__'))
+        def wrapper(self, *args, **kwargs):
+            if fn.__name__ == '__init__':
+                return fn(self, *[arg.encode('utf-8') if isinstance(arg, unicode) else arg for arg in args], **kwargs)
+            return fn(self).encode('utf-8')
+        return wrapper
+
+    if issubclass(cls, Exception):
+        cls.__init__ = decorator(cls.__init__)
+        return cls
+
+    cls.__unicode__ = cls.__str__
+    cls.__str__ = decorator(cls.__unicode__)
+    cls.__repr__ = decorator(cls.__repr__)
+    return cls
 
 
-def is_unicode(string):
-    """Python 2 and 3 friendly function to check if an object is a unicode string"""
-    return isinstance(string, unicode if sys.version_info[0] < 3 else str)
+def with_metaclass(meta, *bases):
+    """
+    Create a base class with a metaclass.
+    """
+    class MetaClass(meta):
+        def __new__(cls, name, this_bases, dct):
+            return meta(name, bases, dct)
+    return type.__new__(MetaClass, 'temporary_class', (), {})
 
 
-def to_string(string):
-    """Converts unicode to utf-8 if on Python 2, leaves as is if on Python 3"""
-    return string.encode('utf-8') if sys.version_info[0] < 3 else string
+def merge_dicts(a, b):
+    """
+    Merges dicts a and b recursively into a new dict.
+
+    :param dict a: (required).
+    :param dict b: (required).
+    """
+    result = copy.deepcopy(a)
+
+    for key, value in b.items():
+        if isinstance(value, dict):
+            result[key] = merge_dicts(value, a.get(key, {}))
+        else:
+            result[key] = value
+
+    return result
 
 
 class MemorizeFormatter(string.Formatter):
-    """Memorizes all arguments, used during string formatting"""
+    """
+    Memorizes all arguments, used during string formatting.
+    """
     def __init__(self):
         self.used_kwargs = {}
         self.unused_kwargs = {}

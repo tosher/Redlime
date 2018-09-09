@@ -59,6 +59,8 @@ def rl_get_percentage(percentage):
 
 
 def rl_get_progressbar(percentage):
+    if not percentage:
+        percentage = 0
     n = int(int(percentage) / 10)
     positive = rl_get_setting('progress_bar_positive_char', '+') * n
     negative = rl_get_setting('progress_bar_negative_char', '-') * (10 - n)
@@ -118,10 +120,29 @@ def rl_get_issues_header(title, count, page_number):
     return content_header
 
 
-def rl_show_issues(title, **kwargs):
+def rl_filter_issues(**kwargs):
+    redmine = Redlime.connect()
+    return redmine.issue.filter(**kwargs)
+
+
+def rl_search_issues(keyword, **kwargs):
+    redmine = Redlime.connect()
+    found_issues = redmine.issue.search(keyword, **kwargs)
+    if not found_issues:
+        return []
+    issues = []
+    # In some cases Redmine’s REST API doesn’t provide us with full resource data
+    for issue in found_issues:
+        # iss_full = redmine.issue.get(issue.id)
+        # issues.append(iss_full)
+        issue.refresh()
+        issues.append(issue)
+    return issues
+
+
+def rl_show_issues(title, issues, **kwargs):
     content = ''
     redmine = Redlime.connect()
-    issues = redmine.issue.filter(**kwargs)
 
     cols = rl_get_setting('issue_list_columns', {})
     tbl_header = [col['colname'] for col in cols]

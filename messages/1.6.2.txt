@@ -1,0 +1,5 @@
+Redlime 1.6.2 changelog:
+
+* Issue edit fixes in multi-cell layout.
+* New command: Issue search
+* Python-redmine library was updated to 2.1.1

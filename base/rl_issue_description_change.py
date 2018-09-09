@@ -38,13 +38,11 @@ class RedlimeChangeDescriptionCommand(sublime_plugin.TextCommand):
 
 class RedlimeChangeDescriptionDoneCommand(sublime_plugin.TextCommand):
     def run(self, edit, text):
-        base_id = self.view.settings().get('base_id')
         issue_id = self.view.settings().get('issue_id')
-        eb = RlEditbox(base_id)
-        eb.layout_base()
         redmine = Redlime.connect()
         issue = redmine.issue.get(issue_id)
         issue.description = text
         issue.save()
-        eb.view.run_command('redlime_fetcher', {'issue_id': issue_id})
+        self.view.window().status_message('Description saved!')
+        self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
 

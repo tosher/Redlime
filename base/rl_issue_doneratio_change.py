@@ -13,7 +13,7 @@ class RedlimeDoneRatioIssueCommand(sublime_plugin.TextCommand):
             if idx >= 0:
                 issue.done_ratio = int(enums[idx])
                 issue.save()
-                sublime.status_message('Done ratio changed!')
+                self.view.window().status_message('Done ratio changed!')
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
 
         issue_id = self.view.settings().get('issue_id', None)

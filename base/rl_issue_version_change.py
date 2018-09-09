@@ -13,7 +13,7 @@ class RedlimeVersionIssueCommand(sublime_plugin.TextCommand):
             if idx >= 0:
                 issue.fixed_version_id = project_version_ids[idx]
                 issue.save()
-                sublime.status_message('Version changed!')
+                self.view.window().status_message('Version changed!')
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
 
         issue_id = self.view.settings().get('issue_id', None)

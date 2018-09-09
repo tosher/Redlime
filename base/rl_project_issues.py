@@ -36,7 +36,8 @@ class RedlimeProjectIssuesCommand(sublime_plugin.TextCommand):
                 'status_id': 'open'
             }
             # text = utils.rl_show_cases(**query_params)
-            text = utils.rl_show_issues(title=title, **query_params)
+            issues = utils.rl_filter_issues(**query_params)
+            text = utils.rl_show_issues(title=title, issues=issues, **query_params)
             r = self.view.window().new_file()
             r.set_name(title)
             syntax_file = utils.rl_get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')

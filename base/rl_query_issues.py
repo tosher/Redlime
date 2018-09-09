@@ -25,7 +25,8 @@ class RedlimeFetchQueryCommand(sublime_plugin.TextCommand):
             'page_number': page_number,
             'status_id': 'open'
         }
-        content = utils.rl_show_issues(title=title, **query_params)
+        issues = utils.rl_filter_issues(**query_params)
+        content = utils.rl_show_issues(title=title, issues=issues, **query_params)
         r.settings().set('query_params', query_params)
         r.settings().set('title', title)
         r.settings().set('screen', 'redlime_query')

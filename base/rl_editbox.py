@@ -1,6 +1,7 @@
 #!/usr/bin/env python\n
 # -*- coding: utf-8 -*-
 
+import copy
 import sublime
 import sublime_plugin
 from . import rl_utils as utils
@@ -11,7 +12,11 @@ class RedlimeEditboxSaveCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         text = self.view.substr(sublime.Region(0, self.view.size()))
         cmd = self.view.settings().get('on_done')
-        self.view.run_command(cmd, {'text': text})
+        layout = self.view.settings().get('base_layout')
+        base_id = self.view.settings().get('base_id')
+        eb = RlEditbox(base_id)
+        eb.view.run_command(cmd, {'text': text})
+        eb.layout_base(layout)
 
     def is_visible(self, *args):
         screen = self.view.settings().get('screen')
@@ -29,8 +34,9 @@ class RedlimeEditboxCancelCommand(sublime_plugin.TextCommand):
         if not is_del:
             return
         base_id = self.view.settings().get('base_id')
+        layout = self.view.settings().get('base_layout')
         eb = RlEditbox(base_id)
-        eb.layout_base()
+        eb.layout_base(layout)
 
     def is_visible(self, *args):
         screen = self.view.settings().get('screen')
@@ -42,10 +48,6 @@ class RedlimeEditboxCancelCommand(sublime_plugin.TextCommand):
 
 
 class RlEditbox(object):
-    CELL_MAIN = [0, 0, 1, 1]  # group of base view
-    CELL_EDIT = [0, 1, 1, 2]  # group of editor
-    CELL_MAIN_GROUP = 0  # index of base group in cells of layout
-    CELL_EDIT_GROUP = 1  # index of editor group in cells of layout
 
     def __init__(self, base_id, syntax_auto=False, height=None):
         self.base_id = base_id
@@ -57,6 +59,8 @@ class RlEditbox(object):
     def edit(self, title, on_done, text=None, **kwargs):
         if not text:
             text = ''
+        self.base_layout = self.layout()
+        self.base_group = self.window.active_group()
         self.layout_edit()
         self.editbox = self.window.new_file()
         self.editbox.set_name(title)
@@ -72,7 +76,8 @@ class RlEditbox(object):
         self.editbox.settings().set('on_done', on_done)
         self.editbox.settings().set('base_id', self.base_id)
         self.editbox.settings().set('screen', 'redlime_editbox')
-        self.editbox.settings().set("word_wrap", True)
+        self.editbox.settings().set('word_wrap', True)
+        self.editbox.settings().set('base_layout', self.base_layout)
         for arg in kwargs.keys():
             self.editbox.settings().set(arg, kwargs[arg])
         self.editbox.run_command('redlime_insert_text', {'position': 0, 'text': text})
@@ -84,27 +89,30 @@ class RlEditbox(object):
         return self.window.layout()
 
     def is_active(self):
-        lt = self.layout()
-        action = True if len(lt.get('cells', [])) > 1 else False
-        return action
+        if hasattr(self, 'editbox'):
+            return True
+        views = sublime.active_window().views()
+        for view in views:
+            if view.settings().get('screen', '') == 'redlime_editbox':
+                return True
+        return False
 
-    def focus_editbox(self):
-        if self.is_active():
-            self.window.focus_group(self.CELL_EDIT_GROUP)
+    def focus_base(self):
+        self.window.focus_view(self.view)
 
     def view_base(self):
-        views = sublime.active_window().views_in_group(self.CELL_MAIN_GROUP)
+        views = sublime.active_window().views()
         for view in views:
             if view.id() == self.base_id:
                 return view
 
     def view_editbox(self):
-        if self.is_active():
-            return sublime.active_window().views_in_group(self.CELL_EDIT_GROUP)[0]
-        return None
-
-    def focus_base(self):
-        self.window.focus_group(self.CELL_MAIN_GROUP)
+        if hasattr(self, 'editbox'):
+            self.editbox
+        views = sublime.active_window().views()
+        for view in views:
+            if view.settings().get('screen', '') == 'redlime_editbox':
+                return view
 
     def get_editbox_height(self):
         h = self.height if self.height else utils.rl_get_setting('edit_height_percent')
@@ -112,31 +120,31 @@ class RlEditbox(object):
         ratio = (100 - int(h)) / 100
         return ratio
 
+    def add_row_cell(self, layout):
+        height_prev_row = layout['rows'][-2]
+        height_eb = height_prev_row + self.get_editbox_height()
+        layout['rows'].insert(-1, height_eb)
+
+        rows = len(layout['rows']) - 1
+        cols = len(layout['cols']) - 1
+        layout['cells'].append([0, rows - 1, cols, rows])
+        return layout
+
     def layout_edit(self):
-        r = self.get_editbox_height()
+        layout = copy.deepcopy(self.base_layout)
+        self.add_row_cell(layout)
         self.window.run_command(
             'set_layout',
-            {
-                "cols": [0.0, 1.0],
-                "rows": [0.0, r, 1.0],
-                "cells": [
-                    self.CELL_MAIN,
-                    self.CELL_EDIT
-                ]
-            }
+            layout
         )
-        self.focus_editbox()
+        # set focus to last group
+        self.window.focus_group(-1)
 
-    def layout_base(self):
+    def layout_base(self, layout):
+        self.base_layout = layout
         self.view_editbox().close()
         self.focus_base()
         self.window.run_command(
             'set_layout',
-            {
-                "cols": [0.0, 1.0],
-                "rows": [0.0, 1.0],
-                "cells": [
-                    self.CELL_MAIN
-                ]
-            }
+            self.base_layout
         )

@@ -37,14 +37,11 @@ class RedlimeIssueAddCommentCommand(sublime_plugin.TextCommand):
 
 class RedlimeIssueAddCommentDoneCommand(sublime_plugin.TextCommand):
     def run(self, edit, text):
-        base_id = self.view.settings().get('base_id')
         issue_id = self.view.settings().get('issue_id')
-        eb = RlEditbox(base_id)
-        eb.layout_base()
         redmine = Redlime.connect()
         issue = redmine.issue.get(issue_id)
         issue.notes = text
         issue.save()
-        sublime.status_message('Comment posted!')
-        eb.view.run_command('redlime_fetcher', {'issue_id': issue_id})
+        self.view.window().status_message('Comment posted!')
+        self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
 

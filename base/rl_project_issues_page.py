@@ -28,8 +28,8 @@ class RedlimeIssuesPageCommand(sublime_plugin.TextCommand):
         self.view.settings().set('query_params', query_params)
 
         if query_params:
-            # text = utils.rl_show_cases(**query_params)
-            text = utils.rl_show_issues(title=title, **query_params)
+            issues = utils.rl_filter_issues(**query_params)
+            text = utils.rl_show_issues(title=title, issues=issues, **query_params)
             self.view.set_read_only(False)
             self.view.erase(edit, sublime.Region(0, self.view.size()))
             self.view.run_command('redlime_insert_text', {'position': 0, 'text': text})

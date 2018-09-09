@@ -15,7 +15,7 @@ class RedlimeSetAssignedCommand(sublime_plugin.TextCommand):
                 issue.assigned_to_id = assigned_to_id
                 issue.save()
 
-                sublime.status_message('Issue #%r is assigned to %s!' % (issue.id, users_menu[index]))
+                self.view.window().status_message('Issue #%r is assigned to %s!' % (issue.id, users_menu[index]))
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
 
         redmine = Redlime.connect()

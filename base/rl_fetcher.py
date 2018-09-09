@@ -18,7 +18,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
         try:
             self.redlime_view(edit, issue_id)
         except Exception as e:
-            sublime.status_message('Issue #%s not found! (%s)' % (issue_id, e))
+            self.view.window().status_message('Issue #%s not found! (%s)' % (issue_id, e))
 
     def redlime_view(self, edit, issue_id):
 

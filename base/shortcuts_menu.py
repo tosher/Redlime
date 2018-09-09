@@ -107,6 +107,8 @@ class ShortcutsMenu(object):
         return 'kbd'
 
     def show_key(self, keyname):
+        if not keyname:
+            return
         keys = keyname.split('+')
         # return '<span style="padding:1px;">+</span>'.join(['<span style="color:#FBB788;">%s</span>' % k for k in keys])
         return self.html_key_plus.join([self.html_key_tpl % {'kbdclass': self.key_class(k), 'key': k} for k in keys])

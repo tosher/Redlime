@@ -1,5 +1,6 @@
 [
    { "caption": "Redlime: Project issues", "command": "redlime_project_issues" },
+   { "caption": "Redlime: Search issues", "command": "redlime_search_issues" },
    { "caption": "Redlime: List queries", "command": "redlime_get_query" },
    { "caption": "Redlime: View issue", "command": "redlime_issue" },
    { "caption": "Redlime issue: Create", "command": "redlime_issue_create" },

@@ -13,7 +13,7 @@ class RedlimeTrackerIssueCommand(sublime_plugin.TextCommand):
             if idx >= 0:
                 issue.tracker_id = enums_ids[idx]
                 issue.save()
-                sublime.status_message('Tracker changed!')
+                self.view.window().status_message('Tracker changed!')
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
 
         issue_id = self.view.settings().get('issue_id', None)

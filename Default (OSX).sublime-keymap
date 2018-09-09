@@ -1,0 +1,172 @@
+[
+    {
+        "keys": ["super+s"], "command": "redlime_editbox_save",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_editbox"}
+        ]
+    },
+    {
+        "keys": ["escape"], "command": "redlime_editbox_cancel",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_editbox"},
+            { "key": "auto_complete_visible", "operator": "equal", "operand": false },
+            { "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }
+        ]
+    },
+    {
+        "keys": ["shift+ctrl+k"],
+        "command": "redlime_issue"
+    },
+    {
+        "keys": ["c"], "command": "redlime_issue_add_comment",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["t"], "command": "redlime_time_entry_create",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["r"], "command": "redlime_refresh_issue",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["s"], "command": "redlime_set_status",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["g"], "command": "redlime_go_redmine",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["v"], "command": "redlime_version_issue",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["a"], "command": "redlime_set_assigned",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["p"], "command": "redlime_priority_issue",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["%"], "command": "redlime_done_ratio_issue",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["v"], "command": "redlime_issue",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    },
+    {
+        "keys": ["enter"], "command": "redlime_issue",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    },
+    {
+        "keys": ["r"], "command": "redlime_issues_refresh",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    },
+    {
+        "keys": ["n"], "command": "redlime_issue_create",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    },
+    {
+        "keys": ["w"], "command": "redlime_open_wiki",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["l"], "command": "redlime_open_link",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["m"], "command": "redlime_change_project",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["b"], "command": "redlime_change_custom_field",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["f2"], "command": "redlime_change_subject",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["d"], "command": "redlime_change_description",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["i"], "command": "redlime_open_subissue",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["enter"], "command": "redlime_magic_enter",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["u"], "command": "redlime_toggle_selectable",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_issue"}
+        ]
+    },
+    {
+        "keys": ["a"], "command": "redlime_assign_filter",
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    },
+    {
+        "keys": ["left"], "command": "redlime_issues_page",
+        "args": {"direction": 0},
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    },
+    {
+        "keys": ["right"], "command": "redlime_issues_page",
+        "args": {"direction": 1},
+        "context": [
+            {"key": "rl_screen", "operand": "redlime_query"}
+        ]
+    }
+]

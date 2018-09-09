@@ -13,7 +13,7 @@ class RedlimePriorityIssueCommand(sublime_plugin.TextCommand):
             if idx >= 0:
                 issue.priority_id = enums_ids[idx]
                 issue.save()
-                sublime.status_message('Priority changed!')
+                self.view.window().status_message('Priority changed!')
                 self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
 
         issue_id = self.view.settings().get('issue_id', None)

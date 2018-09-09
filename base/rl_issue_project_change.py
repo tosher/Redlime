@@ -1,7 +1,7 @@
 #!/usr/bin/env python\n
 # -*- coding: utf-8 -*-
 
-import sublime
+# import sublime
 import sublime_plugin
 from . import rl_utils as utils
 from .rl_utils import Redlime
@@ -15,7 +15,7 @@ class RedlimeChangeProjectCommand(sublime_plugin.TextCommand):
                     issue = redmine.issue.get(issue_id)
                     issue.project_id = projects[i].id
                     issue.save()
-                    sublime.status_message('Issue #%r is moved to %s' % (issue.id, projects[i].name))
+                    self.view.window().status_message('Issue #%r is moved to %s' % (issue.id, projects[i].name))
                     self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
 
         redmine = Redlime.connect()

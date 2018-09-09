@@ -33,6 +33,7 @@ from .rl_query_issues import RedlimeFetchQueryCommand
 from .rl_issue_create import RedlimeIssueCreateCommand
 from .rl_issue_tracker_change import RedlimeTrackerIssueCommand
 from .rl_time_entry_create import RedlimeTimeEntryCreateCommand
+from .rl_search_issues import RedlimeSearchIssuesCommand
 
 
 __all__ = [
@@ -67,5 +68,6 @@ __all__ = [
     'RedlimeFetchQueryCommand',
     'RedlimeFetcherCommand',
     'RedlimeGetQueryCommand',
-    'RedlimeTimeEntryCreateCommand'
+    'RedlimeTimeEntryCreateCommand',
+    'RedlimeSearchIssuesCommand'
 ]

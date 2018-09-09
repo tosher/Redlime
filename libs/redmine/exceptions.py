@@ -3,13 +3,14 @@ Python-Redmine tries it's best to provide human readable errors in all situation
 This is a list of all exceptions that Python-Redmine can throw.
 """
 
+from . import utilities
 
+
+@utilities.fix_unicode
 class BaseRedmineError(Exception):
     """
     Base exception class for Redmine exceptions.
     """
-    def __init__(self, *args, **kwargs):
-        super(BaseRedmineError, self).__init__(*args, **kwargs)
 
 
 class ResourceError(BaseRedmineError):
@@ -22,10 +23,10 @@ class ResourceError(BaseRedmineError):
 
 class NoFileError(BaseRedmineError):
     """
-    File doesn't exist exception.
+    File doesn't exist or is empty exception.
     """
     def __init__(self):
-        super(NoFileError, self).__init__("Can't upload the file that doesn't exist")
+        super(NoFileError, self).__init__("Can't upload a file that doesn't exist or is empty")
 
 
 class ResourceNotFoundError(BaseRedmineError):
@@ -41,7 +42,7 @@ class ConflictError(BaseRedmineError):
     Resource version on the server is newer than on the client.
     """
     def __init__(self):
-        super(ConflictError, self).__init__("Resource version on the server is newer than on the client")
+        super(ConflictError, self).__init__('Resource version on the server is newer than on the client')
 
 
 class AuthError(BaseRedmineError):
@@ -65,7 +66,7 @@ class ServerError(BaseRedmineError):
     Redmine internal error.
     """
     def __init__(self):
-        super(ServerError, self).__init__('Redmine returned internal error, perhaps you are doing something wrong')
+        super(ServerError, self).__init__('Redmine returned internal error, check Redmine logs for details')
 
 
 class RequestEntityTooLargeError(BaseRedmineError):
@@ -81,8 +82,10 @@ class UnknownError(BaseRedmineError):
     """
     Redmine returned unknown error.
     """
-    def __init__(self, code):
-        super(UnknownError, self).__init__("Redmine returned unknown error with the code {0}".format(code))
+    def __init__(self, status_code):
+        self.status_code = status_code
+        super(UnknownError, self).__init__(
+            'Redmine returned unknown error with the status code {0}'.format(status_code))
 
 
 class ValidationError(BaseRedmineError):
@@ -101,12 +104,13 @@ class ResourceSetIndexError(BaseRedmineError):
         super(ResourceSetIndexError, self).__init__('Resource not available by requested index')
 
 
-class ResourceSetFilterParamError(BaseRedmineError):
+class ResourceSetFilterLookupError(BaseRedmineError):
     """
-    Resource set filter method expects to receive either a list or tuple.
+    Resource set filter method received an invalid lookup in one of the filters.
     """
-    def __init__(self):
-        super(ResourceSetFilterParamError, self).__init__('Method expects to receive either a list or tuple of ids')
+    def __init__(self, lookup, f):
+        super(ResourceSetFilterLookupError, self).__init__(
+            'Received an invalid lookup "{0}" in "{1}" filter'.format(lookup, f))
 
 
 class ResourceBadMethodError(BaseRedmineError):
@@ -198,7 +202,7 @@ class ResourceRequirementsError(BaseRedmineError):
     def __init__(self, requirements):
         super(ResourceRequirementsError, self).__init__(
             'The following requirements must be installed for resource to function: {0}'.format(
-                ', '.join(req if isinstance(req, str) else ' >= '.join(req) for req in requirements)))
+                ', '.join(' >= '.join(req) if isinstance(req, (list, tuple)) else req for req in requirements)))
 
 
 class FileUrlError(BaseRedmineError):
@@ -214,7 +218,7 @@ class ForbiddenError(BaseRedmineError):
     Requested resource is forbidden.
     """
     def __init__(self):
-        super(ForbiddenError, self).__init__("Requested resource is forbidden")
+        super(ForbiddenError, self).__init__('Requested resource is forbidden')
 
 
 class JSONDecodeError(BaseRedmineError):
@@ -225,5 +229,37 @@ class JSONDecodeError(BaseRedmineError):
         self.response = response
         super(JSONDecodeError, self).__init__(
             'Unable to decode received JSON, you can inspect exception\'s '
-            '"response" attribute to find out what the response was'
-        )
+            '"response" attribute to find out what the response was')
+
+
+class ExportNotSupported(BaseRedmineError):
+    """
+    Export functionality not supported by resource.
+    """
+    def __init__(self):
+        super(ExportNotSupported, self).__init__('Export functionality not supported by resource')
+
+
+class ExportFormatNotSupportedError(BaseRedmineError):
+    """
+    The given format isn't supported by resource.
+    """
+    def __init__(self):
+        super(ExportFormatNotSupportedError, self).__init__(
+            "The given format isn't supported by resource")
+
+
+class HTTPProtocolError(BaseRedmineError):
+    """
+    Wrong HTTP protocol usage.
+    """
+    def __init__(self):
+        super(HTTPProtocolError, self).__init__('Redmine url should start with HTTPS and not with HTTP')
+
+
+class EngineClassError(BaseRedmineError):
+    """
+    Engine isn't a class or isn't a BaseEngine subclass.
+    """
+    def __init__(self):
+        super(EngineClassError, self).__init__("Engine isn't a class or isn't a BaseEngine subclass")

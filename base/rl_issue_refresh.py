@@ -1,7 +1,7 @@
 #!/usr/bin/env python\n
 # -*- coding: utf-8 -*-
 
-import sublime
+# import sublime
 import sublime_plugin
 from . import rl_utils as utils
 
@@ -11,7 +11,7 @@ class RedlimeRefreshIssueCommand(sublime_plugin.TextCommand):
         issue_id = self.view.settings().get('issue_id', None)
         if issue_id:
             self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
-            sublime.status_message('Issue Refreshed!')
+            self.view.window().status_message('Issue Refreshed!')
 
     def is_visible(self, *args):
         screen = self.view.settings().get('screen')

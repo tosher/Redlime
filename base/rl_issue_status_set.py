@@ -1,7 +1,7 @@
 #!/usr/bin/env python\n
 # -*- coding: utf-8 -*-
 
-import sublime
+# import sublime
 import sublime_plugin
 from . import rl_utils as utils
 from .rl_utils import Redlime
@@ -15,7 +15,7 @@ class RedlimeSetStatusCommand(sublime_plugin.TextCommand):
                     issue = redmine.issue.get(issue_id)
                     issue.status_id = statuses_ids[i]
                     issue.save()
-                    sublime.status_message('Issue #%r now is %s' % (issue.id, statuses_names[i]))
+                    self.view.window().status_message('Issue #%r now is %s' % (issue.id, statuses_names[i]))
                     self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
 
         redmine = Redlime.connect()
