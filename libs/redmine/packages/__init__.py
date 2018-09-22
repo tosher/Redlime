@@ -1,5 +1,10 @@
 # import os
-import requests
+
+try:
+    from . import requests
+except ImportError:
+    import requests
+
 # from . import requests
 
 # try:
