@@ -1,0 +1,3 @@
+Redlime 1.6.4 changelog:
+
+* Fixed "Key bindings" call from Preferences/Package settings menu
