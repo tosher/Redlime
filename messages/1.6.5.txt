@@ -1,3 +1,4 @@
 Redlime 1.6.5 changelog:
 
 * Issue change action on issues list page
+* Sublime project settings support via `redlime.` prefix. For example: `"redlime.query_page_size": 40`
