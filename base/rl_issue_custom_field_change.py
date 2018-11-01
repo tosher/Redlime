@@ -3,8 +3,8 @@
 
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from . import utils
+from .utils import Redlime
 
 
 class RedlimeChangeCustomFieldCommand(sublime_plugin.TextCommand):
@@ -29,7 +29,7 @@ class RedlimeChangeCustomFieldCommand(sublime_plugin.TextCommand):
 
             if colname:
                 col_prop = None
-                cols = utils.rl_get_setting('issue_view_columns', [])
+                cols = utils.get_setting('issue_view_columns', [])
                 for col in cols:
                     if colname == col['colname']:
                         col_prop = col['prop']

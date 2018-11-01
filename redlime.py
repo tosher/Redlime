@@ -5,7 +5,7 @@ import sublime
 import sublime_plugin
 from .base import *  # noqa
 from .base.shortcuts_menu import ShortcutsMenu
-from .base import rl_utils as utils
+from .base import utils
 
 
 class RedlimeViewEvents(sublime_plugin.ViewEventListener):
@@ -31,8 +31,8 @@ class RedlimeViewEvents(sublime_plugin.ViewEventListener):
             return
         if screen == 'redlime_query':
             is_query = bool(self.view.settings().get('query_params').get('query_id', None))
-            shortcuts = utils.shortcuts_issue_list_query if is_query else utils.shortcuts_issue_list_project
-            cols = utils.cols_issue_list_query if is_query else utils.cols_issue_list_project
+            shortcuts = utils.Shortcuts.shortcuts_issue_list_query() if is_query else utils.Shortcuts.shortcuts_issue_list_project()
+            cols = utils.Shortcuts.cols_issue_list_query() if is_query else utils.Shortcuts.cols_issue_list_project()
             ShortcutsMenu(
                 self.view,
                 shortcuts=shortcuts,
@@ -41,8 +41,8 @@ class RedlimeViewEvents(sublime_plugin.ViewEventListener):
         elif screen == 'redlime_issue':
             ShortcutsMenu(
                 self.view,
-                shortcuts=utils.shortcuts_issue_edit,
-                cols=utils.cols_issue_edit
+                shortcuts=utils.Shortcuts.shortcuts_issue_edit(),
+                cols=utils.Shortcuts.cols_issue_edit()
             )
 
 

@@ -3,15 +3,15 @@
 
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
-# from .rl_utils import Redlime
+from . import utils
+# from .utils import Redlime
 
 
 class RedlimeIssuesPageCommand(sublime_plugin.TextCommand):
     def run(self, edit, direction):
         query_params = self.view.settings().get('query_params')
         title = self.view.settings().get('title')
-        limit = utils.rl_get_setting('query_page_size', 40)
+        limit = utils.get_setting('query_page_size', 40)
         offset = query_params.get('offset', 0)
         page_number = query_params.get('page_number', 1)
         if direction:

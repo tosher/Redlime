@@ -3,15 +3,15 @@
 
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
-# from .rl_utils import Redlime
+from . import utils
+# from .utils import Redlime
 
 
 class RedlimeIssuesRefreshCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         query_params = self.view.settings().get('query_params')
         title = self.view.settings().get('title')
-        limit = utils.rl_get_setting('query_page_size', 40)
+        limit = utils.get_setting('query_page_size', 40)
         query_params['limit'] = limit
         if query_params:
             issues = utils.rl_filter_issues(**query_params)

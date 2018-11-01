@@ -26,6 +26,6 @@
    { "caption": "Redlime issue: Toggle select mode", "command": "redlime_toggle_selectable" },
    { "caption": "Redlime: Previous page", "command": "redlime_issues_page", "args": {"direction": 0} },
    { "caption": "Redlime: Next page", "command": "redlime_issues_page", "args": {"direction": 1} },
-   { "caption": "Redlime: Save edit", "command": "redlime_editbox_save" },
+   { "caption": "Redlime: Save edit", "command": "editbox_save" },
    { "caption": "Redlime time entry: Create", "command": "redlime_time_entry_create" }
 ]

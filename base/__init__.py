@@ -1,8 +1,8 @@
 #!/usr/bin/env python\n
 # -*- coding: utf-8 -*-
 
-from .rl_editbox import RedlimeEditboxSaveCommand
-from .rl_editbox import RedlimeEditboxCancelCommand
+from .editbox import EditboxSaveCommand
+from .editbox import EditboxCancelCommand
 from .rl_issue import RedlimeIssueCommand
 from .rl_issue_any_change import RedlimeMagicEnterCommand
 from .rl_issue_assigned_set import RedlimeSetAssignedCommand
@@ -22,7 +22,7 @@ from .rl_issue_status_set import RedlimeSetStatusCommand
 from .rl_issue_subissue_open import RedlimeOpenSubissueCommand
 from .rl_issue_subject_change import RedlimeChangeSubjectCommand
 from .rl_issue_version_change import RedlimeVersionIssueCommand
-from .rl_utils import RedlimeInsertTextCommand
+from .utils import RedlimeInsertTextCommand
 from .rl_query import RedlimeGetQueryCommand
 from .rl_project_issues import RedlimeProjectIssuesCommand
 from .rl_fetcher import RedlimeFetcherCommand
@@ -37,8 +37,8 @@ from .rl_search_issues import RedlimeSearchIssuesCommand
 
 
 __all__ = [
-    'RedlimeEditboxSaveCommand',
-    'RedlimeEditboxCancelCommand',
+    'EditboxSaveCommand',
+    'EditboxCancelCommand',
     'RedlimeIssueCommand',
     'RedlimeIssueCreateCommand',
     'RedlimeMagicEnterCommand',

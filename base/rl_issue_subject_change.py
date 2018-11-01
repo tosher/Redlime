@@ -2,34 +2,17 @@
 # -*- coding: utf-8 -*-
 
 # import sublime
-import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from .rl_issue_field_change import RedlimeIssueFieldChangeCommand
 
 
-class RedlimeChangeSubjectCommand(sublime_plugin.TextCommand):
+class RedlimeChangeSubjectCommand(RedlimeIssueFieldChangeCommand):
 
-    def run(self, edit):
-        def on_done(text):
-            if text:
-                if issue_id != 0:
-                    issue.subject = text
-                    issue.save()
-                    self.view.run_command('redlime_fetcher', {'issue_id': issue_id})
+    def change(self):
+        self.view.window().show_input_panel("Subject:", self.issue.subject, self.on_done, None, None)
 
-        redmine = Redlime.connect()
-        issue_id = self.view.settings().get('issue_id', None)
-        if issue_id:
-            issue = redmine.issue.get(issue_id)
-            self.view.window().show_input_panel("Subject:", issue.subject, on_done, None, None)
-
-    def is_visible(self, *args):
-        screen = self.view.settings().get('screen')
-        if not screen:
-            return False
-        valid_screens = [
-            utils.object_commands.get('issue', {}).get('screen_view')
-        ]
-        if screen in valid_screens:
-            return True
-        return False
+    def on_done(self, text):
+        if text:
+            self.issue.subject = text
+            self.issue.save()
+            self.view.window().status_message('Subject changed!')
+            self.refresh()

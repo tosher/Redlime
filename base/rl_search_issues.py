@@ -3,8 +3,8 @@
 
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
-# from .rl_utils import Redlime
+from . import utils
+# from .utils import Redlime
 
 
 class RedlimeSearchIssuesCommand(sublime_plugin.TextCommand):
@@ -28,7 +28,7 @@ class RedlimeSearchIssuesCommand(sublime_plugin.TextCommand):
         text = utils.rl_show_issues(title=title, issues=issues)
         r = self.view.window().new_file()
         r.set_name(title)
-        syntax_file = utils.rl_get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
+        syntax_file = utils.get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
         r.set_syntax_file(syntax_file)
         r.settings().set('query_params', {})
         r.settings().set('title', title)

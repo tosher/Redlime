@@ -4,13 +4,13 @@
 import webbrowser
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from . import utils
+from .utils import Redlime
 
 
 class RedlimeOpenWikiCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        field_prop = utils.rl_get_setting('external_wiki_field', None)
+        field_prop = utils.get_setting('external_wiki_field', None)
         if field_prop:
             wiki_url = ''
             issue_id = self.view.settings().get('issue_id', None)

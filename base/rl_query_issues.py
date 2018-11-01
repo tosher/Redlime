@@ -3,8 +3,8 @@
 
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
-# from .rl_utils import Redlime
+from . import utils
+# from .utils import Redlime
 
 
 class RedlimeFetchQueryCommand(sublime_plugin.TextCommand):
@@ -13,9 +13,9 @@ class RedlimeFetchQueryCommand(sublime_plugin.TextCommand):
         title = '%s (%s)' % (query_project_name[0], query_project_name[1])
         r.set_name(title)
         r.set_scratch(True)
-        syntax_file = utils.rl_get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
+        syntax_file = utils.get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
         r.set_syntax_file(syntax_file)
-        limit = utils.rl_get_setting('query_page_size', 40)
+        limit = utils.get_setting('query_page_size', 40)
         page_number = 1
         query_params = {
             'project_id': project_id,

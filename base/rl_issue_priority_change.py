@@ -2,40 +2,24 @@
 # -*- coding: utf-8 -*-
 
 import sublime
-import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from .rl_issue_field_change import RedlimeIssueFieldChangeCommand
 
 
-class RedlimePriorityIssueCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        def on_done(idx):
-            if idx >= 0:
-                issue.priority_id = enums_ids[idx]
-                issue.save()
-                self.view.window().status_message('Priority changed!')
-                self.view.run_command('redlime_fetcher', {'issue_id': issue.id})
+class RedlimePriorityIssueCommand(RedlimeIssueFieldChangeCommand):
 
-        issue_id = self.view.settings().get('issue_id', None)
-        if issue_id:
-            redmine = Redlime.connect()
-            issue = redmine.issue.get(issue_id)
-            enumerations = redmine.enumeration.filter(resource='issue_priorities')
-            enums = []
-            enums_ids = []
-            for enum in enumerations:
-                enums.append(enum.name)
-                enums_ids.append(enum.id)
+    def change(self):
+        enumerations = self.redmine.enumeration.filter(resource='issue_priorities')
+        enums = []
+        self.enums_ids = []
+        for enum in enumerations:
+            enums.append(enum.name)
+            self.enums_ids.append(enum.id)
 
-            sublime.set_timeout(lambda: self.view.window().show_quick_panel(enums, on_done), 1)
+        sublime.set_timeout(lambda: self.view.window().show_quick_panel(enums, self.on_done), 1)
 
-    def is_visible(self, *args):
-        screen = self.view.settings().get('screen')
-        if not screen:
-            return False
-        valid_screens = [
-            utils.object_commands.get('issue', {}).get('screen_view')
-        ]
-        if screen in valid_screens:
-            return True
-        return False
+    def on_done(self, idx):
+        if idx >= 0:
+            self.issue.priority_id = self.enums_ids[idx]
+            self.issue.save()
+            self.view.window().status_message('Priority changed!')
+            self.refresh()

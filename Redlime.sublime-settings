@@ -15,6 +15,7 @@
     "char_left_arrow": "⬅", // ←
     "progress_bar_positive_char": "■", // █ +
     "progress_bar_negative_char": "□", // ░ -
+    "insert_text_command": "redlime_insert_text",
     "issue_list_columns": [
         { "prop": "id", "colname": "#", "custom": false, "align": "right" },
         { "prop": "fixed_version", "colname": "Version", "custom": false},

@@ -3,9 +3,9 @@
 
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
-from .rl_editbox import RlEditbox
+from . import utils
+from .utils import Redlime
+from .editbox import Editbox
 
 
 class RedlimeChangeDescriptionCommand(sublime_plugin.TextCommand):
@@ -16,7 +16,7 @@ class RedlimeChangeDescriptionCommand(sublime_plugin.TextCommand):
         if issue_id:
             redmine = Redlime.connect()
             issue = redmine.issue.get(issue_id)
-            eb = RlEditbox(self.view.id())
+            eb = Editbox(self.view.id())
             eb.edit(
                 'Description',
                 on_done,
@@ -37,7 +37,7 @@ class RedlimeChangeDescriptionCommand(sublime_plugin.TextCommand):
 
 
 class RedlimeChangeDescriptionDoneCommand(sublime_plugin.TextCommand):
-    def run(self, edit, text):
+    def run(self, edit, text, obj_kwargs):
         issue_id = self.view.settings().get('issue_id')
         redmine = Redlime.connect()
         issue = redmine.issue.get(issue_id)

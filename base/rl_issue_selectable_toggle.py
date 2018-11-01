@@ -3,7 +3,7 @@
 
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
+from . import utils
 
 
 class RedlimeToggleSelectableCommand(sublime_plugin.TextCommand):

@@ -4,30 +4,31 @@
 import copy
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
+from . import utils
 
 
-class RedlimeEditboxSaveCommand(sublime_plugin.TextCommand):
+class EditboxSaveCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         text = self.view.substr(sublime.Region(0, self.view.size()))
         cmd = self.view.settings().get('on_done')
         layout = self.view.settings().get('base_layout')
         base_id = self.view.settings().get('base_id')
-        eb = RlEditbox(base_id)
-        eb.view.run_command(cmd, {'text': text})
+        obj_kwargs = self.view.settings().get('obj_kwargs', None)
+        eb = Editbox(base_id)
+        eb.view.run_command(cmd, {'text': text, 'obj_kwargs': obj_kwargs})
         eb.layout_base(layout)
 
     def is_visible(self, *args):
         screen = self.view.settings().get('screen')
         if not screen:
             return False
-        if screen in ['redlime_editbox']:
+        if screen in ['editbox']:
             return True
         return False
 
 
-class RedlimeEditboxCancelCommand(sublime_plugin.TextCommand):
+class EditboxCancelCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         is_del = sublime.ok_cancel_dialog('Are you really want to cancel editing?')
@@ -35,19 +36,19 @@ class RedlimeEditboxCancelCommand(sublime_plugin.TextCommand):
             return
         base_id = self.view.settings().get('base_id')
         layout = self.view.settings().get('base_layout')
-        eb = RlEditbox(base_id)
+        eb = Editbox(base_id)
         eb.layout_base(layout)
 
     def is_visible(self, *args):
         screen = self.view.settings().get('screen')
         if not screen:
             return False
-        if screen in ['redlime_editbox']:
+        if screen in ['editbox']:
             return True
         return False
 
 
-class RlEditbox(object):
+class Editbox(object):
 
     def __init__(self, base_id, syntax_auto=False, height=None):
         self.base_id = base_id
@@ -66,7 +67,7 @@ class RlEditbox(object):
         self.editbox.set_name(title)
         self.editbox.set_scratch(True)
         if not self.syntax_auto:
-            syntax_file = utils.rl_get_setting('syntax_file_edit')
+            syntax_file = utils.get_setting('syntax_file_edit')
             if syntax_file:
                 self.editbox.set_syntax_file(syntax_file)
         else:
@@ -75,12 +76,14 @@ class RlEditbox(object):
                 self.editbox.set_syntax_file(syntax_file)
         self.editbox.settings().set('on_done', on_done)
         self.editbox.settings().set('base_id', self.base_id)
-        self.editbox.settings().set('screen', 'redlime_editbox')
+        self.editbox.settings().set('screen', 'editbox')
         self.editbox.settings().set('word_wrap', True)
         self.editbox.settings().set('base_layout', self.base_layout)
-        for arg in kwargs.keys():
-            self.editbox.settings().set(arg, kwargs[arg])
-        self.editbox.run_command('redlime_insert_text', {'position': 0, 'text': text})
+        self.editbox.settings().set('obj_kwargs', kwargs)
+        self.editbox.run_command(
+            utils.get_setting('insert_text_command'),
+            {'position': 0, 'text': text}
+        )
 
     def auto_syntax(self, name):
         return utils.syntaxes.get(name.split('.')[-1])
@@ -93,7 +96,7 @@ class RlEditbox(object):
             return True
         views = sublime.active_window().views()
         for view in views:
-            if view.settings().get('screen', '') == 'redlime_editbox':
+            if view.settings().get('screen', '') == 'editbox':
                 return True
         return False
 
@@ -111,11 +114,11 @@ class RlEditbox(object):
             self.editbox
         views = sublime.active_window().views()
         for view in views:
-            if view.settings().get('screen', '') == 'redlime_editbox':
+            if view.settings().get('screen', '') == 'editbox':
                 return view
 
     def get_editbox_height(self):
-        h = self.height if self.height else utils.rl_get_setting('edit_height_percent')
+        h = self.height if self.height else utils.get_setting('edit_height_percent')
 
         ratio = (100 - int(h)) / 100
         return ratio

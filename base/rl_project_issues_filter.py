@@ -3,8 +3,8 @@
 
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from . import utils
+from .utils import Redlime
 
 
 class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
@@ -13,7 +13,7 @@ class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
         self.users = []
         self.users_menu = ['*All users']
         redmine = Redlime.connect()
-        groups = utils.rl_get_setting('assigned_to_group_id_filter', [])  # user group filter
+        groups = utils.get_setting('assigned_to_group_id_filter', [])  # user group filter
         if groups:
             for group_id in groups:
                 for user in redmine.user.filter(group_id=group_id):
@@ -33,7 +33,7 @@ class RedlimeAssignFilterCommand(sublime_plugin.TextCommand):
 
     def on_done(self, idx):
         query_params = self.view.settings().get('query_params', {})
-        limit = utils.rl_get_setting('query_page_size', 40)
+        limit = utils.get_setting('query_page_size', 40)
         query_params['limit'] = limit
         query_params['offset'] = 0
         query_params['page_number'] = 1

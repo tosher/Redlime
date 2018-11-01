@@ -11,9 +11,10 @@ from ..libs.redmine import Redmine
 from ..libs.terminaltables.other_tables import WindowsTable as SingleTable
 
 TABLE_SEP = '│'
+PROJECT_SETTINGS_PREFIX = 'redlime'
 
 
-class Redlime:
+class Redlime(object):
     def connect():
         settings = sublime.load_settings("Redlime.sublime-settings")
         url = settings.get('redmine_url')
@@ -31,9 +32,13 @@ class RedlimeInsertTextCommand(sublime_plugin.TextCommand):
         self.view.insert(edit, position, text)
 
 
-def rl_get_setting(key, default_value=None):
+def get_setting(key, default_value=None):
     settings = sublime.load_settings('Redlime.sublime-settings')
-    return settings.get(key, default_value)
+    view = sublime.active_window().active_view()
+    val = None
+    if view is not None:
+        val = sublime.active_window().active_view().settings().get('%s.%s' % (PROJECT_SETTINGS_PREFIX, key), None)
+    return settings.get(key, default_value) if val is None else val
 
 
 def rl_get_safe(issue, value):
@@ -62,8 +67,8 @@ def rl_get_progressbar(percentage):
     if not percentage:
         percentage = 0
     n = int(int(percentage) / 10)
-    positive = rl_get_setting('progress_bar_positive_char', '+') * n
-    negative = rl_get_setting('progress_bar_negative_char', '-') * (10 - n)
+    positive = get_setting('progress_bar_positive_char', '+') * n
+    negative = get_setting('progress_bar_negative_char', '-') * (10 - n)
     return '%s%s %s%%' % (positive, negative, percentage)
 
 
@@ -144,7 +149,7 @@ def rl_show_issues(title, issues, **kwargs):
     content = ''
     redmine = Redlime.connect()
 
-    cols = rl_get_setting('issue_list_columns', {})
+    cols = get_setting('issue_list_columns', {})
     tbl_header = [col['colname'] for col in cols]
     table_data = [tbl_header]
     content += rl_get_issues_header(title, len(issues), kwargs.get('page_number', 1))
@@ -174,54 +179,79 @@ object_commands = {
     }
 }
 
-shortcuts_issue_list_query = OrderedDict([
-    ('new', ['n', 'new issue']),
-    ('edit', ['Enter', 'edit issue']),
-    ('refresh', ['r', 'refresh issues']),
-    ('ppage', [rl_get_setting('char_left_arrow'), 'prev. page']),
-    ('npage', [rl_get_setting('char_right_arrow'), 'next page'])
-])
 
-cols_issue_list_query = [
-    ['new'],
-    ['edit'],
-    ['refresh'],
-    ['ppage'],
-    ['npage']
-]
+class Shortcuts(object):
 
-shortcuts_issue_list_project = shortcuts_issue_list_query.copy()
-shortcuts_issue_list_project['assign'] = ['a', 'assign filter']
+    @staticmethod
+    def shortcuts_issue_list_query():
+        return OrderedDict([
+            ('new', ['n', 'new issue']),
+            ('edit', ['Enter', 'edit issue']),
+            ('refresh', ['r', 'refresh issues']),
+            ('ppage', [get_setting('char_left_arrow'), 'prev. page']),
+            ('npage', [get_setting('char_right_arrow'), 'next page']),
 
-cols_issue_list_project = cols_issue_list_query[:]
-cols_issue_list_project.insert(3, ['assign'])
+            ('subject', ['F2', 'change subject']),
+            ('state', ['s', 'change state']),
+            ('version', ['v', 'change version']),
+            ('assignto', ['a', 'assign to']),
+            ('priority', ['p', 'change priority']),
+            ('ratio', ['%', 'change done ratio']),
+            ('project', ['m', 'move to project']),
+            ('time_entry', ['t', 'time entry'])
+        ])
 
-shortcuts_issue_edit = OrderedDict([
-    ('subject', ['F2', 'change subject']),
-    ('comment', ['c', 'new comment']),
-    ('state', ['s', 'change state']),
-    ('version', ['v', 'change version']),
-    ('custom', ['b', 'change custom field']),
-    ('assign', ['a', 'assign to']),
-    ('priority', ['p', 'change priority']),
-    ('ratio', ['%', 'change done ratio']),
-    ('project', ['m', 'move to project']),
-    ('refresh', ['r', 'refresh issue']),
-    ('browser', ['g', 'open in browser']),
-    ('wiki', ['w', 'open external wiki']),
-    ('link', ['l', 'open selected link']),
-    ('descr', ['d', 'change description']),
-    ('issue', ['i', 'open selected issue']),
-    ('mode', ['u', 'toggle select mode']),
-    ('any', ['Enter', 'change any']),
-    ('time_entry', ['t', 'time entry'])
-])
+    @staticmethod
+    def cols_issue_list_query():
+        return [
+            ['new', 'edit', 'refresh'],
+            ['subject', 'assignto', 'time_entry', 'state'],
+            ['version', 'priority', 'project', 'ratio'],
+            ['ppage', 'npage']
+        ]
 
-cols_issue_edit = [
-    ['refresh', 'subject', 'descr'],
-    ['comment', 'assign', 'time_entry'],
-    ['state', 'version', 'priority'],
-    ['project', 'custom', 'any'],
-    ['ratio', 'mode', 'wiki'],
-    ['browser', 'link', 'issue']
-]
+    @staticmethod
+    def shortcuts_issue_list_project():
+        cuts = Shortcuts.shortcuts_issue_list_query().copy()
+        cuts['assign'] = ['f', 'assign filter']
+        return cuts
+
+    @staticmethod
+    def cols_issue_list_project():
+        cuts = Shortcuts.cols_issue_list_query()[:]
+        cuts[0].append('assign')
+        return cuts
+
+    @staticmethod
+    def shortcuts_issue_edit():
+        return OrderedDict([
+            ('subject', ['F2', 'change subject']),
+            ('comment', ['c', 'new comment']),
+            ('state', ['s', 'change state']),
+            ('version', ['v', 'change version']),
+            ('custom', ['b', 'change custom field']),
+            ('assign', ['a', 'assign to']),
+            ('priority', ['p', 'change priority']),
+            ('ratio', ['%', 'change done ratio']),
+            ('project', ['m', 'move to project']),
+            ('refresh', ['r', 'refresh issue']),
+            ('browser', ['g', 'open in browser']),
+            ('wiki', ['w', 'open external wiki']),
+            ('link', ['l', 'open selected link']),
+            ('descr', ['d', 'change description']),
+            ('issue', ['i', 'open selected issue']),
+            ('mode', ['u', 'toggle select mode']),
+            ('any', ['Enter', 'change any']),
+            ('time_entry', ['t', 'time entry'])
+        ])
+
+    @staticmethod
+    def cols_issue_edit():
+        return [
+            ['refresh', 'subject', 'descr'],
+            ['comment', 'assign', 'time_entry'],
+            ['state', 'version', 'priority'],
+            ['project', 'custom', 'any'],
+            ['ratio', 'mode', 'wiki'],
+            ['browser', 'link', 'issue']
+        ]

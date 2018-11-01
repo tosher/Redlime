@@ -4,7 +4,7 @@
 import webbrowser
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
+from . import utils
 
 
 class RedlimeOpenLinkCommand(sublime_plugin.TextCommand):

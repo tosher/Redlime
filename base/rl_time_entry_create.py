@@ -4,8 +4,8 @@
 import datetime
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from . import utils
+from .utils import Redlime
 
 
 class RedlimeTimeEntryCreateCommand(sublime_plugin.TextCommand):
@@ -14,9 +14,11 @@ class RedlimeTimeEntryCreateCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         self.redmine = Redlime.connect()
-        issue_id = self.view.settings().get('issue_id', None)
+        # issue_id = self.view.settings().get('issue_id', None)
+        self.screen = self.view.settings().get('screen')
+        issue_id = self.get_issue_id()
         if issue_id is None:
-            projects_filter = utils.rl_get_setting('projects_filter', [])
+            projects_filter = utils.get_setting('projects_filter', [])
             if projects_filter:
                 projects = [self.redmine.project.get(pid) for pid in projects_filter]
             else:
@@ -30,6 +32,19 @@ class RedlimeTimeEntryCreateCommand(sublime_plugin.TextCommand):
             self.view.window().show_quick_panel(prj_names, self.on_project_done)
         else:
             self.on_issue_done(issue_id)
+
+    def get_issue_id(self):
+        issue_id = None
+        if self.screen == 'redlime_issue':
+            issue_id = self.view.settings().get('issue_id', None)
+        elif self.screen == 'redlime_query':
+            try:
+                line = self.view.substr(self.view.line(self.view.sel()[0].end()))
+                issue_id = line.split(utils.TABLE_SEP)[1].strip()
+                int(issue_id)  # check is number
+            except Exception:
+                pass
+        return issue_id
 
     def on_project_done(self, index):
         if index < 0:

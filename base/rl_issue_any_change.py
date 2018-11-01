@@ -3,7 +3,7 @@
 
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
+from . import utils
 
 
 class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
@@ -39,7 +39,7 @@ class RedlimeMagicEnterCommand(sublime_plugin.TextCommand):
                 if self.view.substr(selected).lstrip(' ').startswith('['):
                     self.view.run_command('redlime_open_link')
             else:
-                cols = utils.rl_get_setting('issue_view_columns', [])
+                cols = utils.get_setting('issue_view_columns', [])
                 colname = self.view.substr(selected).split('**')[1]
                 col_prop = ''
                 for col in cols:

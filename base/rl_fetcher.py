@@ -6,8 +6,8 @@ from operator import attrgetter
 from datetime import timedelta
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from . import utils
+from .utils import Redlime
 from ..libs.terminaltables.other_tables import WindowsTable as SingleTable
 
 BLOCK_LINE = '```\n'
@@ -40,10 +40,10 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
         else:
             r = sublime.active_window().new_file()
             r.set_scratch(True)
-            syntax_file = utils.rl_get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
+            syntax_file = utils.get_setting('syntax_file', 'Packages/Redlime/Redlime.tmLanguage')
             r.set_syntax_file(syntax_file)
 
-        cols = utils.rl_get_setting('issue_view_columns', [])
+        cols = utils.get_setting('issue_view_columns', [])
         cols_maxlen = len(max([col['colname'] for col in cols], key=len)) + 5  # +4* +1
 
         issue = self.redmine.issue.get(issue_id)
@@ -143,7 +143,7 @@ class RedlimeFetcherCommand(sublime_plugin.TextCommand):
             content += '## Revisions\n'
             content += BLOCK_LINE
             for chset in issue.changesets:
-                redmine_url = utils.rl_get_setting('redmine_url')
+                redmine_url = utils.get_setting('redmine_url')
                 project = self.redmine.project.get(issue.project.id)
                 chset_url = '%s/projects/%s/repository/revisions/%s' % (redmine_url.rstrip('/'), project.identifier, chset['revision'])
                 content += '\t[%s](%s)\n\t**Comment**: %s *(%s)*\n' % (chset['user']['name'], chset_url, chset['comments'], utils.rl_get_datetime(chset['committed_on']))

@@ -4,8 +4,8 @@
 import datetime
 import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from . import utils
+from .utils import Redlime
 
 
 class RedlimeIssueCreateCommand(sublime_plugin.TextCommand):
@@ -15,7 +15,7 @@ class RedlimeIssueCreateCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         self.redmine = Redlime.connect()
-        projects_filter = utils.rl_get_setting('projects_filter', [])
+        projects_filter = utils.get_setting('projects_filter', [])
         if projects_filter:
             projects = [self.redmine.project.get(pid) for pid in projects_filter]
         else:
@@ -36,7 +36,7 @@ class RedlimeIssueCreateCommand(sublime_plugin.TextCommand):
         self.issue_data['project_id'] = self.prj_ids[index]
 
         self.users = []
-        groups = utils.rl_get_setting('assigned_to_group_id_filter', [])  # user group filter
+        groups = utils.get_setting('assigned_to_group_id_filter', [])  # user group filter
         if groups:
             for group_id in groups:
                 for user in self.redmine.user.filter(group_id=group_id):
@@ -87,7 +87,7 @@ class RedlimeIssueCreateCommand(sublime_plugin.TextCommand):
         issue.priority_id = 1  # low as default
         issue.assigned_to_id = self.issue_data['assigned_to_id']
         dt_start = datetime.datetime.now()  # Текущая дата и время
-        estimated_hours = utils.rl_get_setting('issue_default_estimated_hours', self.ESTIMATED_HOURS_DEFAULT)
+        estimated_hours = utils.get_setting('issue_default_estimated_hours', self.ESTIMATED_HOURS_DEFAULT)
         dt_due = dt_start + datetime.timedelta(hours=estimated_hours)
         issue.start_date = dt_start.strftime('%Y-%m-%d')
         issue.due_date = dt_due.strftime('%Y-%m-%d')

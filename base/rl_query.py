@@ -3,8 +3,8 @@
 
 # import sublime
 import sublime_plugin
-from . import rl_utils as utils
-from .rl_utils import Redlime
+from . import utils
+from .utils import Redlime
 
 
 class RedlimeGetQueryCommand(sublime_plugin.TextCommand):
@@ -16,7 +16,7 @@ class RedlimeGetQueryCommand(sublime_plugin.TextCommand):
                 self.view.run_command('redlime_fetch_query', {'project_id': project_id, 'query_id': query, 'query_project_name': query_names[i]})
 
         redmine = Redlime.connect()
-        projects_filter = utils.rl_get_setting('projects_filter', [])
+        projects_filter = utils.get_setting('projects_filter', [])
         if projects_filter:
             projects = [redmine.project.get(pid) for pid in projects_filter]
         else:

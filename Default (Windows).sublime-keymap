@@ -1,14 +1,14 @@
 [
     {
-        "keys": ["ctrl+s"], "command": "redlime_editbox_save",
+        "keys": ["ctrl+s"], "command": "editbox_save",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_editbox"}
+            {"key": "rl_screen", "operand": "editbox"}
         ]
     },
     {
-        "keys": ["escape"], "command": "redlime_editbox_cancel",
+        "keys": ["escape"], "command": "editbox_cancel",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_editbox"},
+            {"key": "rl_screen", "operand": "editbox"},
             { "key": "auto_complete_visible", "operator": "equal", "operand": false },
             { "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true }
         ]
@@ -26,7 +26,7 @@
     {
         "keys": ["t"], "command": "redlime_time_entry_create",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
@@ -38,7 +38,7 @@
     {
         "keys": ["s"], "command": "redlime_set_status",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
@@ -50,31 +50,25 @@
     {
         "keys": ["v"], "command": "redlime_version_issue",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
         "keys": ["a"], "command": "redlime_set_assigned",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
         "keys": ["p"], "command": "redlime_priority_issue",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
         "keys": ["%"], "command": "redlime_done_ratio_issue",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
-        ]
-    },
-    {
-        "keys": ["v"], "command": "redlime_issue",
-        "context": [
-            {"key": "rl_screen", "operand": "redlime_query"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
@@ -110,7 +104,7 @@
     {
         "keys": ["m"], "command": "redlime_change_project",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
@@ -122,7 +116,7 @@
     {
         "keys": ["f2"], "command": "redlime_change_subject",
         "context": [
-            {"key": "rl_screen", "operand": "redlime_issue"}
+            {"key": "rl_screen", "operand": ["redlime_issue", "redlime_query"]}
         ]
     },
     {
@@ -150,7 +144,7 @@
         ]
     },
     {
-        "keys": ["a"], "command": "redlime_assign_filter",
+        "keys": ["f"], "command": "redlime_assign_filter",
         "context": [
             {"key": "rl_screen", "operand": "redlime_query"}
         ]

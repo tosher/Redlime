@@ -1,0 +1,3 @@
+Redlime 1.6.5 changelog:
+
+* Issue change action on issues list page
