@@ -13,7 +13,7 @@ Concept idea based on another plugin (fork): [SubRed](https://packagecontrol.io/
 ## Screenshots
 
 Project issues list:
-![Redlime - project issues](https://raw.githubusercontent.com/wiki/tosher/Redlime/redlime_issues.png
+![Redlime - project issues](https://raw.githubusercontent.com/wiki/tosher/Redlime/redlime_issues.png)
 
 Issue:
 ![Redlime - project issue](https://raw.githubusercontent.com/wiki/tosher/Redlime/redlime_issue.png)
