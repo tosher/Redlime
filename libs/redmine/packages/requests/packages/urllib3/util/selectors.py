@@ -11,7 +11,8 @@ import select
 import socket
 import sys
 import time
-from collections import namedtuple, Mapping
+from collections import namedtuple
+from collections.abc import Mapping
 
 try:
     monotonic = time.monotonic

@@ -12,7 +12,7 @@ requests.utils imports from here, so be careful with imports.
 import copy
 import time
 import calendar
-import collections
+import collections.abc
 
 from ._internal_utils import to_native_string
 from .compat import cookielib, urlparse, urlunparse, Morsel
@@ -169,7 +169,7 @@ class CookieConflictError(RuntimeError):
     """
 
 
-class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):
+class RequestsCookieJar(cookielib.CookieJar, collections.abc.MutableMapping):
     """Compatibility class; is a cookielib.CookieJar, but exposes a dict
     interface.
 

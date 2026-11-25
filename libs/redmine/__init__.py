@@ -6,7 +6,13 @@ import os
 import inspect
 import contextlib
 
-from distutils.version import LooseVersion
+import re as _re
+
+
+def LooseVersion(vstring):
+    """Stand-in for distutils.version.LooseVersion (distutils was removed in Python 3.12).
+    Compares the numeric parts, which is all the version checks here need."""
+    return tuple(int(x) for x in _re.findall(r'\d+', vstring))
 
 from . import managers, exceptions, engines, utilities, resources
 from .version import __version__
