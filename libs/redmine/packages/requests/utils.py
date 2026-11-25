@@ -8,9 +8,8 @@ This module provides utility functions that are used within Requests
 that are also useful for external consumption.
 """
 
-import cgi
 import codecs
-import collections
+import collections.abc
 import contextlib
 import io
 import os
@@ -33,6 +32,16 @@ from .cookies import cookiejar_from_dict
 from .structures import CaseInsensitiveDict
 from .exceptions import (
     InvalidURL, InvalidHeader, FileModeWarning, UnrewindableBodyError)
+
+
+def _parse_header(line):
+    """Replacement for cgi.parse_header (the cgi module was removed in Python 3.13)."""
+    from email.message import Message
+    msg = Message()
+    msg['content-type'] = line
+    params = msg.get_params()
+    return params[0][0], dict((k.lower(), v) for k, v in params[1:])
+
 
 NETRC_FILES = ('.netrc', '_netrc')
 
@@ -262,7 +271,7 @@ def to_key_val_list(value):
     if isinstance(value, (str, bytes, bool, int)):
         raise ValueError('cannot encode objects that are not 2-tuples')
 
-    if isinstance(value, collections.Mapping):
+    if isinstance(value, collections.abc.Mapping):
         value = value.items()
 
     return list(value)
@@ -419,7 +428,7 @@ def get_encoding_from_headers(headers):
     if not content_type:
         return None
 
-    content_type, params = cgi.parse_header(content_type)
+    content_type, params = _parse_header(content_type)
 
     if 'charset' in params:
         return params['charset'].strip("'\"")

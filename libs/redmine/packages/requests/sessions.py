@@ -10,7 +10,7 @@ requests (cookies, auth, proxies).
 import os
 import platform
 import time
-from collections import Mapping
+from collections.abc import Mapping
 from datetime import timedelta
 
 from .auth import _basic_auth_str
